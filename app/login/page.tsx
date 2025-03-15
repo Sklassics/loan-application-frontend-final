@@ -182,17 +182,9 @@ export default function LoginPage() {
         setIsVerifying(false)
         setEmailOtpSent(true)
         setAuthStep("emailOtp")
-        let res:any = await saveUser({ phoneNumber, email })
-        if(res?.status === 200){
-          // Redirect to dashboard after a short delay
-          setTimeout(() => {
-            router.push("/onboarding")
-          }, 1000)
-        }else{
-          setIsVerifying(false)
-          setError(res?.message)
-        }
-
+        setTimeout(() => {
+          router.push("/onboarding")
+        }, 1000)
     }
   }
 

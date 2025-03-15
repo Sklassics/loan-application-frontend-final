@@ -33,6 +33,9 @@ export const useAuthStore = create<IAuthState>()(
             },
             verifyEmailOtpAction: async (payload: IEmailOtpReq) => {
                 const response: IResponse<any> = await http.post('/email/verify-otp', payload)
+                if(response && response?.token) {
+                    setToken(response.token)
+                }
                 return response
             },
             saveUserAction: async (payload: ISaveUserReq) => {
