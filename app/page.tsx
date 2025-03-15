@@ -105,7 +105,7 @@ export default function Home() {
                 <span className="absolute inset-0 bg-violet-600/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
               </Button>
             </Link>
-            <Link href="/register" className="hidden md:block">
+            <Link href="/login" className="hidden md:block">
               <Button className="relative overflow-hidden group bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700">
                 <span className="relative z-10">Register</span>
                 <span className="absolute inset-0 bg-white/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
