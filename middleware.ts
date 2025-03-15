@@ -9,6 +9,7 @@ const protectedRoutes = [
   "/eligibility-check",
   "/withdraw-amount",
   "/transaction-processing",
+  "/bank-verification",
   "/profile",
 ]
 

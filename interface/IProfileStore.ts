@@ -1,10 +1,12 @@
+import { IResponse } from "./ICommonStore"
+
 export interface IProfileState {
     profileState : any
     savePersonalDetailsAction : (payload : IProfileReq) => void
     sendPanOtpAction : (payload : any) => void
     verifyPanOtpAction : (payload : IPanReq) => void
-    sendBankDetailsAction : (payload : IBankReq) => void
-    verifyBankDetailsAction : (payload : IVerBankReq) => void
+    sendBankDetailsAction : (payload : IBankReq) =>  Promise<IResponse<any>>
+    verifyBankDetailsAction : (payload : IVerBankReq) => Promise<IResponse<any>>
 }
 
 export interface IProfileReq{
