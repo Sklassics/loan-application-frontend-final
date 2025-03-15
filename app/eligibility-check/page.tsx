@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { Loader2, AlertCircle, CheckCircle, IndianRupee, Clock, ArrowRight } from "lucide-react"
+import { useCreditStore } from "@/store/credit"
+import { stat } from "fs"
 
 export default function EligibilityCheckPage() {
   const router = useRouter()
@@ -16,6 +18,7 @@ export default function EligibilityCheckPage() {
   const [checkStatus, setCheckStatus] = useState<"idle" | "checking" | "success" | "error">("idle")
   const [eligibleAmount, setEligibleAmount] = useState(0)
   const [errorReason, setErrorReason] = useState("")
+  const getCreditLimit = useCreditStore((state) => state.getCreditLimitAction)
 
   const checkEligibility = async () => {
     setIsChecking(true)
@@ -25,7 +28,7 @@ export default function EligibilityCheckPage() {
     // Simulate progress updates
     const progressInterval = setInterval(() => {
       setCheckingProgress((prev) => {
-        if (prev >= 100) {
+        if (prev <= 100) {
           clearInterval(progressInterval)
           return 100
         }
@@ -34,15 +37,9 @@ export default function EligibilityCheckPage() {
     }, 150)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 3000))
-
-      // Randomly determine if eligible (for demo purposes)
-      const isEligible = Math.random() > 0.3 // 70% chance of being eligible
-
-      if (isEligible) {
-        // Generate a random eligible amount between 50,000 and 500,000
-        const amount = Math.floor(Math.random() * (500000 - 50000) + 50000)
+      const response = await getCreditLimit()
+      if (response?.status === 200 && response?.data?.creditLimit) {
+        const amount = response?.data?.creditLimit
         setEligibleAmount(amount)
         setCheckStatus("success")
       } else {
@@ -84,9 +81,9 @@ export default function EligibilityCheckPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-gray-900 dark:to-slate-900 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-gray-900 dark:to-slate-900 lg:py-12 lg:px-4">
       <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-4xl mx-auto">
-        <motion.div variants={itemVariants} className="text-center mb-8">
+        <motion.div variants={itemVariants} className="hidden lg:block text-center mb-8">
           <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
             Loan Eligibility Check
           </h1>
