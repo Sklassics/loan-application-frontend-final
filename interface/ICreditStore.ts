@@ -1,5 +1,7 @@
+import { IResponse } from "./ICommonStore"
+
 export interface ICreditState {
-    getCreditLimitAction : () => void
+    getCreditLimitAction : () => Promise<IResponse<any>>
     withdrawCreditAction : (payload : IWithdrawReq) => void
 }
 
