@@ -1,7 +1,7 @@
 export interface IProfileState {
     profileState : any
     savePersonalDetailsAction : (payload : IProfileReq) => void
-    sendPanOtpAction : (payload : {pan : string}) => void
+    sendPanOtpAction : (payload : any) => void
     verifyPanOtpAction : (payload : IPanReq) => void
     sendBankDetailsAction : (payload : IBankReq) => void
     verifyBankDetailsAction : (payload : IVerBankReq) => void

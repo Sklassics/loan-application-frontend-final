@@ -14,6 +14,7 @@ import { FileUploader } from "@/components/kyc/file-uploader"
 import { AlertCircle, CheckCircle } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { useProfileStore } from "@/store/profile"
 
 const formSchema = z.object({
   panNumber: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, {
@@ -24,12 +25,12 @@ const formSchema = z.object({
 export default function KycVerificationPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("upload")
-  const [selfieImage, setSelfieImage] = useState<File | null>(null)
   const [panImage, setPanImage] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [verificationStatus, setVerificationStatus] = useState<"idle" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const [panId,setPanId] = useState("")
+  const sendPanOtp = useProfileStore((state) => state.sendPanOtpAction)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -37,34 +38,32 @@ export default function KycVerificationPage() {
       panNumber: "",
     },
   })
-
-  const handleSelfieUpload = (file: File) => {
-    setSelfieImage(file)
-  }
-
   const handlePanUpload = (file: File) => {
     setPanImage(file)
     // In a real app, you might want to extract PAN details from the image using OCR
     // For demo purposes, we'll just set the active tab to details
-    // setActiveTab("details")
   }
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async () => {
     if (!panImage || !panId) {
       setErrorMessage("Please upload both selfie and PAN card images")
       return
     }
+    const panIdRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    if (!panIdRegex.test(panId)) {
+      setErrorMessage("PAN Id must be in the format ABCDE1234F")
+      return;
+    }
 
     setIsSubmitting(true)
     setVerificationStatus("idle")
-
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      const formData = new FormData()
-      formData.append("panCard", panImage)
-      const response = { success: true }
-
-      if (response.success) {
+      let req = {
+        panId,
+        panImage,
+      }
+      const response:any = await sendPanOtp(req)
+      if (response.status == 200) {
         setVerificationStatus("success")
         setTimeout(() => {
           router.push("/eligibility-check")
@@ -188,13 +187,13 @@ export default function KycVerificationPage() {
                       </AnimatePresence>
 
                   <div className="flex justify-end mt-6">
-                    <Button
-                      onClick={() =>onSubmit}
-                      disabled={!panImage && !panId}
-                      className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-                    >
-                      Verify
-                    </Button>
+                  <Button
+                    onClick={() => {onSubmit()}}
+                    disabled={!(panImage && panId)}
+                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                  >
+                    Verify
+                  </Button>
                   </div>
                 </TabsContent>
               </Tabs>
