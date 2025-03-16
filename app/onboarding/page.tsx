@@ -48,13 +48,9 @@ export default function OnboardingPage() {
       setIsComplete(true)
       // Here you would typically submit the complete form data to your API
       console.log("Complete form data:", { ...formData, employmentInfo: data })
-      const req = await transformFormData({ ...formData, employmentInfo: data })
-      const response:any = await saveDetails(req)
-      if(response?.status === 200) {
-        setIsComplete(true)
-      }else{
-        toast.error(response?.message)
-      }
+      setTimeout(() => {
+         setIsComplete(true)
+      }, 2000)
     }
   }
 

@@ -22,17 +22,13 @@ export default function LoginPage() {
   const [otpSent, setOtpSent] = useState(false)
   const [emailOtpSent, setEmailOtpSent] = useState(false)
   const [phoneVerified, setPhoneVerified] = useState(false)
-  const [emailVerified, setEmailVerified] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [activeTab, setActiveTab] = useState("phone")
   const [authStep, setAuthStep] = useState<"phone" | "phoneOtp" | "email" | "emailOtp" | "complete">("phone")
   const [error, setError] = useState("")
   const sendMobOtp = useAuthStore((state) => state.sendMobileOtpAction)
   const verifyMobOtp = useAuthStore((state) => state.verifyMobileOtpAction)
   const sendEmailOtp = useAuthStore((state) => state.sendEmailOtpAction)
   const verifyEmailOtp = useAuthStore((state) => state.verifyEmailOtpAction)
-  const saveUser = useAuthStore((state) => state.saveUserAction)
 
   const handleSendOtp = async() => {
     // Validate phone number
@@ -42,7 +38,9 @@ export default function LoginPage() {
     }
     setError("")
     setIsVerifying(true)
-    const response:any = await sendMobOtp({phoneNumber })
+    // Simulate OTP sending
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const response:any = {status: 200}
     if(response?.status === 200){  
       setIsVerifying(false)
       setOtpSent(true)
@@ -118,29 +116,43 @@ export default function LoginPage() {
     setError("")
     setIsVerifying(true)
     let req = { phoneNumber, otp: otpValue }
-    const response:any = await verifyMobOtp(req)
-    if(response?.status || response?.statusCode === 200){  
-        setIsVerifying(false)
-        setPhoneVerified(true)
-        if(!response?.isEmailVerified){
-          setAuthStep("email")
-        }else if(!response?.isPersonalDetailsVerified){
-          router.push("/onboarding")
-        }else if(!response?.isPancardVerified){
-          router.push("/kyc-verification")
-        }else if(!response?.isCreditLimit){
-          router.push("/eligibility-check")
-        }else if(!response?.isBankDetails){
-          router.push("/onboarding")
-        }else if(!response?.isWithDrawAmount){
-          router.push("/withdraw-amount")
-        }else{
-          router.push("/dashboard")
+    // Sample response for demonstration purposes
+    const response: any = {
+      status: 200,
+      isEmailVerified: false,
+      isPersonalDetailsVerified: true,
+      isPancardVerified: true,
+      isCreditLimit: true,
+      isBankDetails: true,
+      isWithDrawAmount: true,
+    };
+
+    setTimeout(() => {
+      if (response?.status === 200) {
+        setIsVerifying(false);
+        setPhoneVerified(true);
+
+        if (!response?.isEmailVerified) {
+          setAuthStep("email");
+        } else if (!response?.isPersonalDetailsVerified) {
+          router.push("/onboarding");
+        } else if (!response?.isPancardVerified) {
+          router.push("/kyc-verification");
+        } else if (!response?.isCreditLimit) {
+          router.push("/eligibility-check");
+        } else if (!response?.isBankDetails) {
+          router.push("/onboarding");
+        } else if (!response?.isWithDrawAmount) {
+          router.push("/withdraw-amount");
+        } else {
+          router.push("/dashboard");
         }
-    }else{
-      setIsVerifying(false)
-      setError(response?.message)
-    }
+      } else {
+        setIsVerifying(false);
+        setError(response?.message);
+      }
+    }, 2000);
+    
   }
 
   const handleSendEmailOtp = async() => {
@@ -151,14 +163,16 @@ export default function LoginPage() {
     }
     setError("")
     setIsVerifying(true)
-    const response:any = await sendEmailOtp({ email })
-    if(response?.status === 200){  
-      setIsVerifying(false)
-      setEmailOtpSent(true)
-      setAuthStep("emailOtp")
-    }else{
-      setIsVerifying(false)
-      setError(response?.message)
+    // Sample response for demonstration purposes
+    const response: any = { status: 200 };
+
+    if (response?.status === 200) {
+      setIsVerifying(false);
+      setEmailOtpSent(true);
+      setAuthStep("emailOtp");
+    } else {
+      setIsVerifying(false);
+      setError(response?.message);
     }
   }
 
@@ -177,15 +191,18 @@ export default function LoginPage() {
       email,
       otp : otpValue
     }
-    const response:any = await verifyEmailOtp(req)
-    if(response?.status === 200){  
-        setIsVerifying(false)
-        setEmailOtpSent(true)
-        setAuthStep("emailOtp")
-        setTimeout(() => {
-          router.push("/onboarding")
-        }, 1000)
-    }
+    const response: any = { status: 200 };
+    setTimeout(() => {
+      if (response?.status === 200) {
+        setIsVerifying(false);
+        setEmailOtpSent(true);
+        setAuthStep("emailOtp");
+        router.push("/onboarding");
+      } else {
+        setIsVerifying(false);
+        setError(response?.message);
+      }
+    }, 2000);
   }
 
   // Animation variants

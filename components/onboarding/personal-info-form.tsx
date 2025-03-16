@@ -31,9 +31,6 @@ const formSchema = z.object({
   dateOfBirth: z
     .date({
       required_error: "Please select a date of birth.",
-    })
-    .refine(validateAge, {
-      message: "You must be at least 18 years old.",
     }),
   gender: z.string({
     required_error: "Please select a gender.",
@@ -169,8 +166,12 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
             control={form.control}
             name="dateOfBirth"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Date of Birth</FormLabel>
+              <FormItem className="flex flex-col relative">
+                <FormLabel
+                 className={cn(
+                  "absolute top-2 left-3 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white dark:bg-gray-800 px-2 text-gray-500 duration-300",
+                  field.value ? "opacity-100" : "opacity-0",
+                )}>Date of Birth</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -242,8 +243,12 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
             control={form.control}
             name="maritalStatus"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Marital Status</FormLabel>
+              <FormItem className="relative">
+                <FormLabel
+                 className={cn(
+                  "absolute top-2 left-3 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white dark:bg-gray-800 px-2 text-gray-500 duration-300",
+                  field.value ? "opacity-100" : "opacity-0",
+                )}>Marital Status</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger className="h-14 pl-10 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400">

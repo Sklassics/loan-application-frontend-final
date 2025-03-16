@@ -47,11 +47,11 @@ const items = [
     href: "/profile",
     icon: User,
   },
-  {
-    title: "Settings",
-    href: "/settings",
-    icon: Settings,
-  },
+  // {
+  //   title: "Settings",
+  //   href: "/settings",
+  //   icon: Settings,
+  // },
   {
     title: "Support",
     href: "/support",
