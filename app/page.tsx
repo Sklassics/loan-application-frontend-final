@@ -77,7 +77,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600"
             >
-              LoanEase
+              Sklassics
             </motion.span>
           </Link>
           <nav className="hidden md:flex gap-6">
@@ -422,7 +422,7 @@ export default function Home() {
                 Why Choose Us
               </div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 mb-4">
-                The LoanEase Advantage
+                The Sklassics Advantage
               </h2>
               <p className="max-w-[800px] mx-auto text-slate-700 md:text-xl">
                 We make the loan application process simple, transparent, and hassle-free
@@ -505,7 +505,7 @@ export default function Home() {
                 <div>
                   <h3 className="text-2xl font-bold text-violet-800 mb-4">Our Commitment to You</h3>
                   <p className="text-slate-700 mb-6">
-                    At LoanEase, we're committed to providing a seamless, transparent, and customer-focused lending experience. Our team of financial experts is dedicated to helping you achieve your goals.
+                    At Sklassics, we're committed to providing a seamless, transparent, and customer-focused lending experience. Our team of financial experts is dedicated to helping you achieve your goals.
                   </p>
                   <ul className="space-y-3">
                     <li className="flex items-center gap-3">
@@ -711,7 +711,7 @@ export default function Home() {
                         </div>
                         <div>
                           <p className="text-sm text-slate-500">Email</p>
-                          <p className="font-medium">support@loanease.com</p>
+                          <p className="font-medium">support@Sklassics.com</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -805,7 +805,7 @@ export default function Home() {
               </div>
             </div>
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600">
-              LoanEase
+              Sklassics
             </span>
           </Link>
           <p className="text-sm text-slate-600 md:text-base">Making loans accessible for everyone</p>
@@ -941,7 +941,7 @@ export default function Home() {
       </div>
       <div className="border-t py-6 bg-gradient-to-r from-violet-100/50 to-indigo-100/50">
         <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-          <p className="text-sm text-slate-600">© {new Date().getFullYear()} LoanEase. All rights reserved.</p>
+          <p className="text-sm text-slate-600">© {new Date().getFullYear()} Sklassics. All rights reserved.</p>
           <div className="flex gap-4">
             <Link href="#" className="text-sm text-slate-600 hover:text-violet-600 transition-colors">
               Privacy Policy
