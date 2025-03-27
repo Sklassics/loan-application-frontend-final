@@ -120,7 +120,7 @@ export default function EligibilityCheckPage() {
                     </p>
                     <Button
                       onClick={checkEligibility}
-                      className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 px-8"
+                      className="bg-violet-150"
                     >
                       Check Eligibility
                     </Button>
@@ -206,7 +206,7 @@ export default function EligibilityCheckPage() {
                           setCheckStatus("idle")
                           setErrorReason("")
                         }}
-                        className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                        className="bg-violet-150"
                       >
                         Try Again
                       </Button>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -22,25 +23,28 @@ export default function LoginPage() {
   const [otpSent, setOtpSent] = useState(false)
   const [emailOtpSent, setEmailOtpSent] = useState(false)
   const [phoneVerified, setPhoneVerified] = useState(false)
+  const [emailVerified, setEmailVerified] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [activeTab, setActiveTab] = useState("phone")
   const [authStep, setAuthStep] = useState<"phone" | "phoneOtp" | "email" | "emailOtp" | "complete">("phone")
   const [error, setError] = useState("")
   const sendMobOtp = useAuthStore((state) => state.sendMobileOtpAction)
   const verifyMobOtp = useAuthStore((state) => state.verifyMobileOtpAction)
   const sendEmailOtp = useAuthStore((state) => state.sendEmailOtpAction)
   const verifyEmailOtp = useAuthStore((state) => state.verifyEmailOtpAction)
+  const saveUser = useAuthStore((state) => state.saveUserAction)
 
   const handleSendOtp = async() => {
     // Validate phone number
+  
     if (phoneNumber.length !== 10) {
       setError("Please enter a valid phone number")
       return
     }
     setError("")
     setIsVerifying(true)
-    // Simulate OTP sending
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    const response:any = {status: 200}
+    const response:any = await sendMobOtp({phoneNumber })
     if(response?.status === 200){  
       setIsVerifying(false)
       setOtpSent(true)
@@ -108,6 +112,7 @@ export default function LoginPage() {
   }
 
   const handleVerifyOtp = async() => {
+  
     const otpValue = phoneOtp.join("")
     if (otpValue.length !== 6) {
       setError("Please enter a valid 4-digit OTP")
@@ -116,46 +121,33 @@ export default function LoginPage() {
     setError("")
     setIsVerifying(true)
     let req = { phoneNumber, otp: otpValue }
-    // Sample response for demonstration purposes
-    const response: any = {
-      status: 200,
-      isEmailVerified: false,
-      isPersonalDetailsVerified: true,
-      isPancardVerified: true,
-      isCreditLimit: true,
-      isBankDetails: true,
-      isWithDrawAmount: true,
-    };
-
-    setTimeout(() => {
-      if (response?.status === 200) {
-        setIsVerifying(false);
-        setPhoneVerified(true);
-
-        if (!response?.isEmailVerified) {
-          setAuthStep("email");
-        } else if (!response?.isPersonalDetailsVerified) {
-          router.push("/onboarding");
-        } else if (!response?.isPancardVerified) {
-          router.push("/kyc-verification");
-        } else if (!response?.isCreditLimit) {
-          router.push("/eligibility-check");
-        } else if (!response?.isBankDetails) {
-          router.push("/onboarding");
-        } else if (!response?.isWithDrawAmount) {
-          router.push("/withdraw-amount");
-        } else {
-          router.push("/dashboard");
+    const response:any = await verifyMobOtp(req)
+    if(response?.status || response?.statusCode === 200){  
+        setIsVerifying(false)
+        setPhoneVerified(true)
+        if(!response?.isEmailVerified){
+          setAuthStep("email")
+        }else if(!response?.isPersonalDetailsVerified){
+          router.push("/onboarding")
+        }else if(!response?.isPancardVerified){
+          router.push("/kyc-verification")
+        }else if(!response?.isCreditLimit){
+          router.push("/eligibility-check")
+        }else if(!response?.isBankDetails){
+          router.push("/onboarding")
+        }else if(!response?.isWithDrawAmount){
+          router.push("/withdraw-amount")
+        }else{
+          router.push("/dashboard")
         }
-      } else {
-        setIsVerifying(false);
-        setError(response?.message);
-      }
-    }, 2000);
-    
+    }else{
+      setIsVerifying(false)
+      setError(response?.message)
+    }
   }
 
   const handleSendEmailOtp = async() => {
+    
     // Validate email
     if (!email || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i.test(email)) {
       setError("Please enter a valid email address")
@@ -163,20 +155,22 @@ export default function LoginPage() {
     }
     setError("")
     setIsVerifying(true)
-    // Sample response for demonstration purposes
-    const response: any = { status: 200 };
-
-    if (response?.status === 200) {
-      setIsVerifying(false);
-      setEmailOtpSent(true);
-      setAuthStep("emailOtp");
-    } else {
-      setIsVerifying(false);
-      setError(response?.message);
+    const response:any = await sendEmailOtp({ email })
+    if(response?.status === 200){  
+      setIsVerifying(false)
+      setEmailOtpSent(true)
+      setAuthStep("emailOtp")
+    }else{
+      setIsVerifying(false)
+      setError(response?.message)
     }
   }
 
   const handleVerifyEmailOtp = async() => {
+    if (emailVerified) {
+      setError("Email verification is already completed.");
+      return;
+    }
     const otpValue = emailOtp.join("")
 
     if (otpValue.length !== 6) {
@@ -191,18 +185,23 @@ export default function LoginPage() {
       email,
       otp : otpValue
     }
-    const response: any = { status: 200 };
-    setTimeout(() => {
-      if (response?.status === 200) {
-        setIsVerifying(false);
-        setEmailOtpSent(true);
-        setAuthStep("emailOtp");
-        router.push("/onboarding");
-      } else {
-        setIsVerifying(false);
-        setError(response?.message);
-      }
-    }, 2000);
+    const response:any = await verifyEmailOtp(req)
+    if(response?.status === 200){  
+        setIsVerifying(false)
+        setEmailOtpSent(true)
+        setAuthStep("emailOtp")
+        let res:any = await saveUser({ phoneNumber, email })
+        if(res?.status === 200){
+          // Redirect to dashboard after a short delay
+          setTimeout(() => {
+            router.push("/onboarding")
+          }, 1000)
+        }else{
+          setIsVerifying(false)
+          setError(res?.message)
+        }
+
+    }
   }
 
   // Animation variants
@@ -228,13 +227,12 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      <div className="absolute top-20 left-20 w-72 h-72 rounded-full bg-violet-300/20 blur-3xl"></div>
-      <div className="absolute bottom-20 right-20 w-72 h-72 rounded-full bg-indigo-300/20 blur-3xl"></div>
-
-      <div className="flex h-16 items-center border-b backdrop-blur-sm bg-white/70 px-4 md:px-6 z-10">
+    <div className="absolute top-20 left-20 w-72 h-72 rounded-full bg-violet-300/20 blur-3xl"></div>
+    <div className="absolute bottom-20 right-20 w-72 h-72 rounded-full bg-indigo-300/20 blur-3xl"></div>
+    <div className="flex h-16 items-center border-b backdrop-blur-sm bg-white/70 px-4 md:px-6 z-10">
         <Link
           href="/"
-          className="flex items-center gap-2 text-lg font-semibold text-violet-700 transition-colors hover:text-violet-900"
+          className="flex items-center gap-2 text-lg font-semibold text-gray-700 transition-colors hover:text-[#1ea664]"
         >
           <ArrowLeft className="h-5 w-5" />
           <span>Back to Home</span>
@@ -249,7 +247,7 @@ export default function LoginPage() {
           className="mx-auto max-w-md space-y-6 w-full"
         >
           <motion.div variants={itemVariants} className="space-y-2 text-center">
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600">
+            <h1 className="text-3xl font-bold bg-clip-text text-gray-800">
               Welcome Back
             </h1>
             <p className="text-slate-600">Login to your account to continue</p>
@@ -286,10 +284,12 @@ export default function LoginPage() {
                   )}
                 </div>
                 <Button
-                  className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300"
+                  className="w-full bg-[#1ea664]  transition-all duration-300"
                   onClick={handleSendOtp}
-                  disabled={isVerifying}
-                >
+          disabled={isVerifying}
+        >
+          <span className="absolute bottom-0 left-[-10%] w-0 h-[120%]  bg-violet-150 skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+          <span className="absolute bottom-0 right-[-10%] w-0 h-[120%] bg-violet-150  skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
                   {isVerifying ? (
                     <div className="flex items-center">
                       <svg
@@ -335,7 +335,7 @@ export default function LoginPage() {
                   <p className="text-sm text-slate-500">
                     We've sent a 6-digit OTP to {phoneNumber}.
                     <button
-                      className="ml-1 text-violet-600 hover:text-violet-800 hover:underline transition-colors"
+                      className="ml-1 text-[#44ce6f] hover:text-[#39ff78] hover:underline transition-colors"
                       onClick={() => setAuthStep("phone")}
                     >
                       Change
@@ -366,13 +366,13 @@ export default function LoginPage() {
                   )}
 
                   <div className="text-center mt-2">
-                    <button className="text-sm text-violet-600 hover:text-violet-800 hover:underline transition-colors">
+                    <button className="text-sm text-[#44ce6f] hover:text-[#3dff7a] hover:underline transition-colors">
                       Resend OTP
                     </button>
                   </div>
                 </div>
                 <Button
-                  className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300"
+                  className="w-full bg-gradient-to-r from-violet-150 to-violet-150 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300"
                   onClick={handleVerifyOtp}
                   disabled={isVerifying}
                 >
@@ -444,7 +444,7 @@ export default function LoginPage() {
                 </div>
 
                 <Button
-                  className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300"
+                  className="w-full bg-gradient-to-r from-violet-150 to-violet-150 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300"
                   onClick={handleSendEmailOtp}
                   disabled={isVerifying}
                 >
@@ -493,7 +493,7 @@ export default function LoginPage() {
                   <p className="text-sm text-slate-500">
                     We've sent a 6-digit OTP to {email}.
                     <button
-                      className="ml-1 text-violet-600 hover:text-violet-800 hover:underline transition-colors"
+                      className="ml-1 text-[#44ce6f] hover:text-[#3edc70] hover:underline transition-colors"
                       onClick={() => setAuthStep("email")}
                     >
                       Change
@@ -524,13 +524,13 @@ export default function LoginPage() {
                   )}
 
                   <div className="text-center mt-2">
-                    <button className="text-sm text-violet-600 hover:text-violet-800 hover:underline transition-colors">
+                    <button className="text-sm text-[#44ce6f] hover:text-[#3edc70] hover:underline transition-colors">
                       Resend OTP
                     </button>
                   </div>
                 </div>
                 <Button
-                  className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300"
+                  className="w-full bg-violet-150 duration-300"
                   onClick={handleVerifyEmailOtp}
                   disabled={isVerifying}
                 >
@@ -594,11 +594,11 @@ export default function LoginPage() {
           {authStep !== "complete" && (
             <>
               <motion.div variants={itemVariants} className="text-center text-sm">
-                <p className="text-slate-600">
+                <p className="text-slate-400">
                   Don&apos;t have an account?{" "}
                   <Link
                     href="/register"
-                    className="text-violet-600 hover:text-violet-800 hover:underline transition-colors"
+                    className="text-gray-600 hover:text-[#1ea664] hover:underline transition-colors"
                   >
                     Register
                   </Link>
@@ -612,20 +612,44 @@ export default function LoginPage() {
               </motion.div>
 
               <motion.div variants={itemVariants} className="flex gap-4 justify-center">
-                {["google", "apple", "facebook"].map((provider) => (
-                  <button
-                    key={provider}
-                    className="flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-                  >
-                    <img
-                      src={`/placeholder.svg?height=24&width=24&text=${provider.charAt(0).toUpperCase()}`}
-                      alt={`${provider} login`}
-                      width={24}
-                      height={24}
-                    />
-                  </button>
-                ))}
-              </motion.div>
+                   {[
+                 {
+                      name: "google",
+                      icon: (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M23.76 12.27c0-.79-.07-1.54-.19-2.27H12v4.27h6.65c-.3 1.54-1.16 2.85-2.47 3.73v3.09h3.97c2.32-2.14 3.61-5.29 3.61-8.82z" fill="#4285F4"/>
+                          <path d="M12 24c3.24 0 5.95-1.08 7.93-2.92l-3.97-3.09c-1.1.75-2.5 1.2-3.96 1.2-3.05 0-5.64-2.07-6.56-4.86H1.32v3.12C3.3 21.07 7.36 24 12 24z" fill="#34A853"/>
+                          <path d="M5.44 14.33c-.25-.75-.39-1.55-.39-2.33s.14-1.58.39-2.33V6.55H1.32C.48 8.32 0 10.11 0 12c0 1.89.48 3.68 1.32 5.45l4.12-3.12z" fill="#FBBC05"/>
+                          <path d="M12 4.79c1.74 0 3.3.6 4.52 1.78l3.38-3.38C17.95 1.08 15.24 0 12 0 7.36 0 3.3 2.93 1.32 6.55l4.12 3.12c.92-2.79 3.51-4.88 6.56-4.88z" fill="#EA4335"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      name: "apple",
+                      icon: (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M16.5 0c-.96.05-2.12.66-2.81 1.5-.61.75-1.09 1.8-.89 2.85 1 .04 2.06-.56 2.71-1.38.6-.76 1.06-1.82.99-2.97zm-1.65 5.4c-1.5 0-2.64.83-3.46.83-.83 0-1.93-.78-3.18-.78-1.62 0-3.08.97-3.91 2.47-1.67 2.97-.43 7.37 1.2 9.8.81 1.16 1.75 2.46 3.03 2.41 1.22-.05 1.69-.79 3.16-.79 1.47 0 1.86.79 3.17.76 1.31-.02 2.14-1.16 2.94-2.32.92-1.37 1.3-2.72 1.32-2.79-.03-.01-2.56-1.01-2.59-4.01-.02-2.51 1.99-3.71 2.08-3.78-1.14-1.66-2.94-1.87-3.56-1.92z" fill="black"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      name: "facebook",
+                      icon: (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M22.675 0H1.325C.592 0 0 .592 0 1.325v21.35C0 23.408.592 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.41c0-3.1 1.894-4.79 4.66-4.79 1.325 0 2.464.098 2.795.142v3.24h-1.918c-1.505 0-1.796.716-1.796 1.765v2.315h3.59l-.467 3.622h-3.123V24h6.126c.733 0 1.325-.592 1.325-1.325V1.325C24 .592 23.408 0 22.675 0z" fill="#1877F2"/>
+                        </svg>
+                      ),
+                    },
+                  ].map(({ name, icon }) => (
+                    <button
+                      key={name}
+                      className="flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </motion.div>
+
             </>
           )}
         </motion.div>
@@ -633,4 +657,3 @@ export default function LoginPage() {
     </div>
   )
 }
-

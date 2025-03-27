@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import * as z from "zod"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -68,8 +68,9 @@ export default function WithdrawAmountPage() {
 
   // Calculate EMI
   useEffect(() => {
-    const amount = form.watch("amount")
-    const tenure = form.watch("tenure")
+    const amount = useWatch({ control: form.control, name: "amount" })
+    const tenure = useWatch({ control: form.control, name: "tenure" })
+    
     const monthlyInterestRate = interestRate / 12 / 100
 
     // EMI = [P x R x (1+R)^N]/[(1+R)^N-1]
@@ -83,32 +84,34 @@ export default function WithdrawAmountPage() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true)
     setWithdrawStatus("idle")
-
+  
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Simulate API response (success for demo)
-      const response = { success: true }
-
-      if (response.success) {
+      const response = await fetch("/api/withdraw", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      })
+  
+      const data = await response.json()
+  
+      if (response.ok) {
         setWithdrawStatus("success")
-        // Redirect to transaction processing page after 1.5 seconds
         setTimeout(() => {
           router.push(`/transaction-processing?amount=${totalAmount}`)
         }, 1500)
       } else {
-        setWithdrawStatus("error")
-        setErrorMessage("Withdrawal failed. Please try again.")
+        throw new Error(data.message || "Withdrawal failed. Please try again.")
       }
-    } catch (error) {
+    } catch (error: any) {
       setWithdrawStatus("error")
-      setErrorMessage("An error occurred during withdrawal. Please try again.")
+      setErrorMessage(error.message || "An error occurred during withdrawal. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
   }
-
+  
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -294,7 +297,7 @@ export default function WithdrawAmountPage() {
                         <Button
                           type="button"
                           onClick={() => setActiveTab("details")}
-                          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                          className="bg-violet-150"
                         >
                           Continue to Bank Details <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
@@ -440,7 +443,7 @@ export default function WithdrawAmountPage() {
                         <Button
                           type="submit"
                           disabled={isSubmitting}
-                          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                          className="bg-violet-150 "
                         >
                           {isSubmitting ? (
                             <>

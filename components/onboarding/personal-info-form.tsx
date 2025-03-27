@@ -31,6 +31,9 @@ const formSchema = z.object({
   dateOfBirth: z
     .date({
       required_error: "Please select a date of birth.",
+    })
+    .refine(validateAge, {
+      message: "You must be at least 18 years old.",
     }),
   gender: z.string({
     required_error: "Please select a gender.",
@@ -166,19 +169,15 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
             control={form.control}
             name="dateOfBirth"
             render={({ field }) => (
-              <FormItem className="flex flex-col relative">
-                <FormLabel
-                 className={cn(
-                  "absolute top-2 left-3 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white dark:bg-gray-800 px-2 text-gray-500 duration-300",
-                  field.value ? "opacity-100" : "opacity-0",
-                )}>Date of Birth</FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel>Date of Birth</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "h-14 pl-10 w-full justify-start text-left font-normal border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400",
+                          "h-14 pl-10 w-full justify-start text-left font-normal hover:bg-white border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400",
                           !field.value && "text-muted-foreground",
                         )}
                       >
@@ -189,7 +188,6 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
-                      mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
@@ -243,16 +241,11 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
             control={form.control}
             name="maritalStatus"
             render={({ field }) => (
-              <FormItem className="relative">
-                <FormLabel
-                 className={cn(
-                  "absolute top-2 left-3 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white dark:bg-gray-800 px-2 text-gray-500 duration-300",
-                  field.value ? "opacity-100" : "opacity-0",
-                )}>Marital Status</FormLabel>
+              <FormItem>
+                <FormLabel>Marital Status</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger className="h-14 pl-10 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400">
-                      <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                       <SelectValue placeholder="Select your marital status" />
                     </SelectTrigger>
                   </FormControl>
@@ -310,7 +303,7 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
         <motion.div variants={itemVariants} className="flex justify-end">
           <Button
             type="submit"
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-6 rounded-lg text-lg font-medium shadow-md hover:shadow-lg transition-all duration-200"
+            className="bg-gradient-to-r from-violet-150 to-violet-150 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-6 rounded-lg text-lg font-medium shadow-md hover:shadow-lg transition-all duration-200"
           >
             Continue
           </Button>
@@ -319,4 +312,3 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
     </Form>
   )
 }
-

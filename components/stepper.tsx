@@ -22,11 +22,11 @@ export function Stepper({ currentStep, className, children }: StepperProps) {
             <div className="relative flex flex-col items-center">
               <div
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors duration-300",
+                  "flex h-10 w-10 items-center justify-center  rounded-full border-2 transition-colors  duration-300",
                   index < currentStep
-                    ? "border-primary bg-primary text-primary-foreground"
+                    ? "border-primary bg-primary text-primary-foreground bg-green-500 border-green-500"
                     : index === currentStep
-                      ? "border-primary bg-background text-primary"
+                      ? "border-primary  bg-background  text-primary"
                       : "border-muted-foreground bg-background text-muted-foreground",
                 )}
               >
@@ -34,7 +34,7 @@ export function Stepper({ currentStep, className, children }: StepperProps) {
               </div>
               <span
                 className={cn(
-                  "absolute -bottom-6 w-max text-center text-xs font-medium",
+                  "absolute -bottom-6 w-max text-center text-xs border-green-500 font-medium",
                   index <= currentStep ? "text-primary" : "text-muted-foreground",
                 )}
               >

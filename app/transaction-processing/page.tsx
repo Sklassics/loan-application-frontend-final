@@ -253,7 +253,7 @@ export default function TransactionProcessingPage() {
                       <div className="flex justify-center">
                         <Button
                           onClick={handleViewRepaymentSchedule}
-                          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                          className="bg-violet-150"
                         >
                           View Repayment Schedule <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
@@ -274,7 +274,7 @@ export default function TransactionProcessingPage() {
                       <div className="flex justify-center mt-6">
                         <Button
                           onClick={() => router.push("/withdraw-amount")}
-                          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                          className="bg-violet-150"
                         >
                           Try Again
                         </Button>

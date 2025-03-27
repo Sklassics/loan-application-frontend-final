@@ -13,6 +13,22 @@ import { motion } from "framer-motion"
 import AnimatedCounter from "@/hooks/use-animated-counter"
 
 export default function DashboardPage() {
+  const [documents, setDocuments] = useState([
+    { title: "PAN Card", description: "Identity verification", status: "Verified", statusColor: "green" },
+    { title: "Bank Details", description: "Account verification", status: "Verified", statusColor: "green" },
+    { title: "Selfie", description: "Facial verification", status: "Not Uploaded", statusColor: "red" },
+    { title: "Address Proof", description: "Residence verification", status: "Not Uploaded", statusColor: "red" },
+    { title: "Income Proof", description: "Salary slips or bank statements", status: "Not Uploaded", statusColor: "red" },
+  ]);
+
+  // Function to handle document upload
+  const handleUpload = (index: number) => {
+    setDocuments((prevDocs) =>
+      prevDocs.map((doc, i) =>
+        i === index ? { ...doc, status: "Pending Verification", statusColor: "yellow" } : doc
+      )
+    );
+  };
   const [activeTab, setActiveTab] = useState("overview")
   const [progressValue, setProgressValue] = useState(0)
 
@@ -39,6 +55,7 @@ export default function DashboardPage() {
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70 } },
   }
 
+
   return (
     <DashboardShell>
       <DashboardHeader heading="Dashboard" text="Manage your loan applications and account details." />
@@ -50,12 +67,12 @@ export default function DashboardPage() {
           >
             Overview
           </TabsTrigger>
-          <TabsTrigger
+          {/* <TabsTrigger
             value="applications"
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white"
           >
             Applications
-          </TabsTrigger>
+          </TabsTrigger> */}
           <TabsTrigger
             value="documents"
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white"
@@ -301,87 +318,53 @@ export default function DashboardPage() {
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <Card className="border-slate-200 hover:shadow-md transition-shadow duration-300">
-              <CardHeader>
-                <CardTitle className="text-slate-800">Documents</CardTitle>
-                <CardDescription className="text-slate-500">Manage your documents and verification</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    {
-                      title: "PAN Card",
-                      description: "Identity verification",
-                      status: "Pending Verification",
-                      statusColor: "yellow",
-                    },
-                    {
-                      title: "Address Proof",
-                      description: "Residence verification",
-                      status: "Not Uploaded",
-                      statusColor: "red",
-                    },
-                    {
-                      title: "Income Proof",
-                      description: "Salary slips or bank statements",
-                      status: "Not Uploaded",
-                      statusColor: "red",
-                    },
-                  ].map((doc, index) => (
-                    <div
-                      key={index}
-                      className="rounded-lg border border-slate-200 p-4 hover:border-violet-200 hover:bg-violet-50/30 transition-colors duration-300"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-5 w-5 text-slate-500" />
-                          <div>
-                            <h3 className="font-medium text-slate-800">{doc.title}</h3>
-                            <p className="text-sm text-slate-500">{doc.description}</p>
-                          </div>
-                        </div>
-                        <span
-                          className={`rounded-full bg-${doc.statusColor}-100 px-2 py-1 text-xs font-medium text-${doc.statusColor}-800`}
-                        >
-                          {doc.status}
-                        </span>
-                      </div>
-                      <div className="mt-4 flex items-center justify-end gap-2">
-                        {doc.status === "Pending Verification" ? (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-slate-200 hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700 transition-all duration-300"
-                            >
-                              View
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-slate-200 hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700 transition-all duration-300"
-                            >
-                              Replace
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            size="sm"
-                            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300"
-                          >
-                            Upload Document
-                          </Button>
-                        )}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <Card className="border-slate-200 hover:shadow-md transition-shadow duration-300">
+          <CardHeader>
+            <CardTitle className="text-slate-800">Documents</CardTitle>
+            <CardDescription className="text-slate-500">Manage your documents and verification</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {documents.map((doc, index) => (
+                <div
+                  key={index}
+                  className="rounded-lg border border-slate-200 p-4 hover:border-violet-200 hover:bg-violet-50/30 transition-colors duration-300"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-slate-500" />
+                      <div>
+                        <h3 className="font-medium text-slate-800">{doc.title}</h3>
+                        <p className="text-sm text-slate-500">{doc.description}</p>
                       </div>
                     </div>
-                  ))}
+                    <span className={`rounded-full bg-${doc.statusColor}-100 px-2 py-1 text-xs font-medium text-${doc.statusColor}-800`}>
+                      {doc.status}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex items-center justify-end gap-2">
+                    {doc.status === "Verified" ? (
+                      <Button variant="outline" size="sm" className="border-slate-200 text-green-700 bg-green-50 hover:bg-green-100 transition-all duration-300">
+                        View
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300"
+                        onClick={() => handleUpload(index)}
+                      >
+                        Upload Document
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </TabsContent>
-
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </TabsContent>
         <TabsContent value="profile" className="space-y-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <Card className="border-slate-200 hover:shadow-md transition-shadow duration-300">

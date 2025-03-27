@@ -12,21 +12,21 @@ const items = [
     href: "/dashboard",
     icon: Home,
   },
-  {
-    title: "Apply for Loan",
-    href: "/apply-loan",
-    icon: FileText,
-  },
-  {
-    title: "Loan Calculator",
-    href: "/loan-calculator",
-    icon: Calculator,
-  },
-  {
-    title: "Verification",
-    href: "/verification",
-    icon: User,
-  },
+  // {
+  //   title: "Apply for Loan",
+  //   href: "/apply-loan",
+  //   icon: FileText,
+  // },
+  // {
+  //   title: "Loan Calculator",
+  //   href: "/loan-calculator",
+  //   icon: Calculator,
+  // },
+  // {
+  //   title: "Verification",
+  //   href: "/verification",
+  //   icon: User,
+  // },
   {
     title: "Transactions",
     href: "/transactions",
