@@ -269,7 +269,7 @@ export default function KycVerificationPage() {
                         <Button
                           type="submit"
                           disabled={isSubmitting}
-                          className="bg-violet-150"
+                          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
                         >
                           {isSubmitting ? (
                             <>
@@ -431,7 +431,7 @@ export default function KycVerificationPage() {
                         <Button
                           type="submit"
                           disabled={isSubmitting || otpForm.watch("otp").length !== 6}
-                          className="bg-violet-150"
+                          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
                         >
                           {isSubmitting ? (
                             <>

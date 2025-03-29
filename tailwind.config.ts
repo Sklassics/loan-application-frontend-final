@@ -54,7 +54,6 @@ module.exports = {
 		  violet: {
 			50: "#f5f3ff",
 			100: "#ede9fe",
-			150: "#c679e3",
 			200: "#ddd6fe",
 			300: "#c4b5fd",
 			400: "#a78bfa",
