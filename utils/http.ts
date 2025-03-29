@@ -57,7 +57,7 @@ http.interceptors.response.use(
     } else {
       // Something happened in setting up the request that triggered an Error
       console.error("Request error:", error.message)
-      // return Promise.reject({ message: error.message })
+      return Promise.reject({ message: error.message })
       return error.message
     }
   },
