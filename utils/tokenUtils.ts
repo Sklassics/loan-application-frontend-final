@@ -44,7 +44,7 @@ export const isTokenValid = (): boolean => {
 
   try {
     // In a real app, you would decode the JWT and check the expiration
-    // For this example, we'll just check if the token exists
+    For this example, we'll just check if the token exists
     return true
   } catch (error) {
     return false
