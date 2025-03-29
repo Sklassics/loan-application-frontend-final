@@ -317,24 +317,16 @@ export default function EmploymentForm({ onSubmit, onBack, initialData }: Employ
 
 
             <motion.div variants={itemVariants}>
-              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className=" dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
                 <div
                   onClick={() => setShowCompanyAddress(!showCompanyAddress)}
                 >
                   <h3 className="font-medium">Company Address</h3>
-                  <Button variant="ghost" size="sm" type="button">
-                    {showCompanyAddress ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                  </Button>
+                    {showCompanyAddress }
                 </div>
 
                 <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{
-                    height: showCompanyAddress ? "auto" : 0,
-                    opacity: showCompanyAddress ? 1 : 0,
-                  }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden"
+                  
                 >
                   <div className="p-4 pt-0">
                     <FormField
