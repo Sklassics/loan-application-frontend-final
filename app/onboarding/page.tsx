@@ -9,6 +9,7 @@ import PersonalInfoForm from "@/components/onboarding/personal-info-form"
 import AddressForm from "@/components/onboarding/address-form"
 import EmploymentForm from "@/components/onboarding/employment-form"
 import { CheckCircle2 } from "lucide-react"
+import Image from "next/image"
 import { FileUploader } from "@/components/kyc/file-uploader"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -181,15 +182,16 @@ export default function OnboardingPage() {
             >
               {step === 1 && (
                 <>
-                  <div className="mb-8">
+                
+                   <div className="mb-8">
                     <Label className="block mb-2">Profile Image</Label>
                     <FileUploader
-                      onFileUpload={handleUserImageUpload}
-                      acceptedFileTypes={["image/jpeg", "image/png"]}
-                      maxSize={5 * 1024 * 1024} // 5MB
-                      label="Upload Profile Image"
-                      description="Upload a clear photo of yourself"
-                      icon="user"
+                        onFileUpload={handleUserImageUpload}
+                        acceptedFileTypes={["image/jpeg", "image/png"]}
+                        maxSize={5 * 1024 * 1024} // 5MB
+                        label="Upload Profile Image"
+                        description="Upload a clear photo of yourself"
+                        icon={"user"}
                     />
                     {imageError && (
                       <Alert variant="destructive" className="mt-4">
