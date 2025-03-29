@@ -82,7 +82,7 @@ export default function ProfilePage() {
         {!isEditing ? (
           <Button
             onClick={() => setIsEditing(true)}
-            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300"
+            className="bg-violet-150 transition-all duration-300"
           >
             <Edit className="mr-2 h-4 w-4" /> Edit Profile
           </Button>
@@ -90,7 +90,7 @@ export default function ProfilePage() {
           <Button
             onClick={handleSaveProfile}
             disabled={isSaving}
-            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300"
+            className="bg-violet-150 transition-all duration-300"
           >
             {isSaving ? (
               <>
@@ -510,7 +510,7 @@ export default function ProfilePage() {
                       className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                     />
                   </div>
-                  <Button className="mt-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300">
+                  <Button className="mt-2 bg-violet-150 transition-all duration-300">
                     Change Password
                   </Button>
 
@@ -523,7 +523,7 @@ export default function ProfilePage() {
                       </div>
                       <Button
                         variant="outline"
-                        className="border-violet-200 text-violet-700 hover:bg-violet-50 hover:text-violet-800 hover:border-violet-300 transition-colors"
+                        className="border-violet-200 text-violet-700 bg-violet-150 transition-colors"
                       >
                         Enable
                       </Button>
@@ -717,7 +717,7 @@ export default function ProfilePage() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 transition-all duration-300">
+                  <Button className="bg-violet-150 transition-all duration-300">
                     Save Preferences
                   </Button>
                 </CardFooter>

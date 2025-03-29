@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -68,13 +69,14 @@ export default function OnboardingPage() {
       father_name: formData.personalInfo.fatherName,
       address: formData.addressInfo.address + ', ' + formData.addressInfo.city + ', ' + formData.addressInfo.state + ' - ' + formData.addressInfo.pincode,
       pincode: formData.addressInfo.pincode,
+      country : 'India',
       alternate_number: formData.addressInfo.alternatePhone,
       employment_type: formData.employmentInfo.employmentType.charAt(0).toUpperCase() + formData.employmentInfo.employmentType.slice(1),
       annual_income: parseInt(formData.employmentInfo.annualIncome),
       company_id: formData.employmentInfo.employmentId,
       company_address: formData.employmentInfo.companyAddress,
       company_name: formData.employmentInfo.companyName,
-      country : 'India'
+     
     };
     return transformedData;
   }
@@ -162,7 +164,7 @@ export default function OnboardingPage() {
                 Thank you for providing your information. Your profile has been successfully created.
               </p>
               <Button
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                className="bg-violet-150"
                 onClick={() => (window.location.href = "/kyc-verification")}
               >
                 KYC Verification

@@ -11,17 +11,42 @@ import { DashboardHeader } from "@/components/dashboard-header"
 import { DashboardShell } from "@/components/dashboard-shell"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MessageCircle, Send, User } from "lucide-react"
+import Image from "next/image"
 
 export default function SupportPage() {
-  const [message, setMessage] = useState("")
-  const [subject, setSubject] = useState("")
-  const [description, setDescription] = useState("")
-  const [priority, setPriority] = useState("medium")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const [message, setMessage] = useState("")
+    const [subject, setSubject] = useState("")
+    const [description, setDescription] = useState("")
+    const [priority, setPriority] = useState("medium")
+    const [isSubmitting, setIsSubmitting] = useState(false)
+  
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (event.target.files) {
+        setAttachment(event.target.files[0])
+      }
+    }
+  
+    const handleSendMail = () => {
+      if (!subject || !message) {
+        alert("Please fill in the subject and message before sending.")
+        return
+      }
+  
+      setIsSubmitting(true)
+  
+      // Simulate API call
+      setTimeout(() => {
+        alert("Email sent successfully!")
+        setIsSubmitting(false)
+      }, 2000)
+    }
+  const [attachment, setAttachment] = useState<File | null>(null)
+  
   const [chatMessages, setChatMessages] = useState([
     { sender: "system", message: "Welcome to LoanEase support! How can we help you today?", time: "10:30 AM" },
   ])
-
+  
   const handleSendMessage = () => {
     if (!message.trim()) return
 
@@ -61,69 +86,64 @@ export default function SupportPage() {
   }
 
   return (
+    
     <DashboardShell>
       <DashboardHeader heading="Customer Support" text="Get help with your loan application or account issues." />
 
-      <Tabs defaultValue="chat" className="space-y-4">
+      <Tabs defaultValue="email" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="chat">Live Chat</TabsTrigger>
-          <TabsTrigger value="ticket">Support Ticket</TabsTrigger>
+          <TabsTrigger value="email">Email Support</TabsTrigger>
           <TabsTrigger value="faq">Quick Help</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="chat" className="space-y-4">
+        <TabsContent value="email" className="space-y-4">
           <Card className="animate-fade-in-up">
             <CardHeader>
-              <CardTitle>Live Chat Support</CardTitle>
-              <CardDescription>Chat with our support team for immediate assistance</CardDescription>
+              <CardTitle>Email Support</CardTitle>
+              <CardDescription>
+                For support, please drop an email to <strong>info@sklassics.com</strong> with your issue details.
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px] flex flex-col">
-                <div className="flex-1 overflow-y-auto space-y-4 p-4 border rounded-md mb-4">
-                  {chatMessages.map((chat, index) => (
-                    <div key={index} className={`flex ${chat.sender === "user" ? "justify-end" : "justify-start"}`}>
-                      <div
-                        className={`max-w-[80%] rounded-lg p-3 ${
-                          chat.sender === "user" ? "bg-primary text-primary-foreground ml-auto" : "bg-muted"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          {chat.sender === "system" && (
-                            <>
-                              <MessageCircle className="h-4 w-4" />
-                              <span className="text-xs font-medium">Support Agent</span>
-                            </>
-                          )}
-                          {chat.sender === "user" && (
-                            <>
-                              <User className="h-4 w-4" />
-                              <span className="text-xs font-medium">You</span>
-                            </>
-                          )}
-                          <span className="text-xs ml-auto">{chat.time}</span>
-                        </div>
-                        <p className="text-sm">{chat.message}</p>
-                      </div>
-                    </div>
-                  ))}
+              
+              <div className="space-y-4 p-4 border rounded-md">
+                <h3 className="text-lg font-semibold">Compose Your Email:</h3>
+                <input
+                  type="text"
+                  placeholder="Subject"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                />
+                <textarea
+                  placeholder="Write your message here..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                  rows={5}
+                />
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700">Attach an image of the issue (optional):</label>
+                  <input type="file" accept="image/*" onChange={handleFileChange} className="mt-2" />
                 </div>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Type your message here..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                  />
-                  <Button onClick={handleSendMessage}>
-                    <Send className="h-4 w-4" />
-                    <span className="sr-only">Send</span>
-                  </Button>
-                </div>
+                <Button
+                  onClick={handleSendMail}
+                  className={`mt-4 px-4 py-2 rounded-md text-white ${
+                    isSubmitting ? "bg-gray-400" : "bg-violet-150"
+                  }`}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Sending..." : "Send Mail"}
+                </Button>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
 
+                    <h1 className="text-xl">Exapmle Mail :</h1 >
+          <Image src="/assets/example-mail.png" alt="Example of writing an email" width={900} height={600} className="rounded-md mx-auto" />
+      
+        </TabsContent>
+    
         <TabsContent value="ticket" className="space-y-4">
           <Card className="animate-fade-in-up">
             <CardHeader>
@@ -189,7 +209,7 @@ export default function SupportPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="attachment">Attachment (Optional)</Label>
+                <Label htmlFor="attachment">Attachment </Label>
                 <Input id="attachment" type="file" />
                 <p className="text-xs text-muted-foreground">
                   You can attach screenshots or documents related to your issue (Max size: 5MB)
@@ -230,7 +250,7 @@ export default function SupportPage() {
                 </div>
 
                 <div className="rounded-lg border p-4">
-                  <h3 className="font-medium">How do I change my registered mobile number?</h3>
+                  <h3 className="font-medium">How do I change my  ed mobile number?</h3>
                   <p className="mt-2 text-sm text-muted-foreground">
                     To change your registered mobile number, go to your Profile page, click on Edit Profile, update your
                     phone number, and verify it with an OTP sent to the new number.
@@ -248,6 +268,7 @@ export default function SupportPage() {
               </div>
 
               <div className="text-center mt-4">
+                
                 <Link href="/faq">
                   <Button variant="outline">View All FAQs</Button>
                 </Link>

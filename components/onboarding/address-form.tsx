@@ -332,7 +332,7 @@ export default function AddressForm({ onSubmit, onBack, initialData }: AddressFo
           </Button>
           <Button
             type="submit"
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-6 rounded-lg text-lg font-medium shadow-md hover:shadow-lg transition-all duration-200"
+            className="bg-gradient-to-r from-violet-150 to-violet-150 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-6 rounded-lg text-lg font-medium shadow-md hover:shadow-lg transition-all duration-200"
           >
             Continue
           </Button>

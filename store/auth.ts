@@ -38,6 +38,7 @@ export const useAuthStore = create<IAuthState>()(
                 }
                 return response
             },
+
             saveUserAction: async (payload: ISaveUserReq) => {
                 let updatedPayload = {mobileNo :get().getPhoneNumberPayload(payload.phoneNumber), email : payload.email}
                 const response: IResponse<any> = await http.post('/api/save', updatedPayload)

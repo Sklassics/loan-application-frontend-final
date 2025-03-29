@@ -257,7 +257,7 @@ export default function LoanHistoryPage() {
                   </CardContent>
                   <CardFooter className="flex flex-col gap-2">
                     <Button
-                      className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300"
+                      className="w-full bg-violet-150 transition-all duration-300"
                       onClick={() => viewLoanDetails(loan.id)}
                     >
                       <FileText className="h-4 w-4 mr-2" />

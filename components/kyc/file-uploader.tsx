@@ -110,7 +110,7 @@ export function FileUploader({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full" onClick={() => fileInputRef.current?.click()}>
       <div
         className={`relative border-2 border-dashed rounded-lg p-6 transition-all duration-300 ${
           isDragging

@@ -6,8 +6,26 @@ import { ArrowRight, Briefcase, GraduationCap, Users, CheckCircle2, ChevronDown 
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import HOMEFAQ from "./home-faq/page"
 
 export default function Home() {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Prevent the default form submission
+
+    // Get form values
+    const form = e.target as HTMLFormElement;
+    const name = (form.elements.namedItem("name") as HTMLInputElement).value;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const message = (form.elements.namedItem("message") as HTMLInputElement).value;
+
+    // Construct the Gmail URL with pre-filled data
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=dineshshanigarapu33@gmail.com&su=Message from ${encodeURIComponent(
+      name
+    )}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\nMessage: ${message}`)}`;
+
+    // Redirect the user to the Gmail compose URL
+    window.open(gmailUrl, "_blank");
+  }
   const [activeQuestion, setActiveQuestion] = useState<number | null>(null)
   const [isVisible, setIsVisible] = useState({
     hero: false,
@@ -57,8 +75,9 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="flex flex-col min-h-screen overflow-hidden ">
       <header className="border-b sticky top-0 z-50 bg-white/80 backdrop-blur-md">
+      
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold text-xl">
             <div className="relative h-8 w-8 overflow-hidden rounded-md bg-gradient-to-br from-violet-600 to-indigo-600">
@@ -77,7 +96,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600"
             >
-              LoanEase
+              Logo
             </motion.span>
           </Link>
           <nav className="hidden md:flex gap-6">
@@ -100,15 +119,18 @@ export default function Home() {
           </nav>
           <div className="flex gap-4">
             <Link href="/login">
-              <Button variant="outline" className="relative overflow-hidden group border-violet-600 text-violet-600">
-                <span className="relative z-10">Login</span>
-                <span className="absolute inset-0 bg-violet-600/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
-              </Button>
+            <div className="relative inline-block group animate-fadeIn opacity-100 transition-opacity duration-700">
+      <button className="relative z-10 px-3 py-2 rounded-md text-white font-semibold overflow-hidden border bg-violet-150 bg-opacity-100 transition-all duration-300">
+       Login
+        <span className="absolute bottom-0 left-[-10%] w-0 h-[120%] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+        <span className="absolute bottom-0 right-[-10%] w-0 h-[120%] border-[#1ea664] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+      </button>
+    </div>
             </Link>
-            <Link href="/login" className="hidden md:block">
-              <Button className="relative overflow-hidden group bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700">
+            <Link href="/register" className="hidden md:block">
+              <Button className="relative overflow-hidden group bg-violet-150">
                 <span className="relative z-10">Register</span>
-                <span className="absolute inset-0 bg-white/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                <span className="absolute inset-0 bg-white/20 transform translate-y-full  group-hover:translate-y-0 transition-transform duration-300"></span>
               </Button>
             </Link>
           </div>
@@ -119,14 +141,34 @@ export default function Home() {
         <section ref={sectionRefs.hero} className="w-full py-12 md:py-24 lg:py-32 xl:py-48 relative overflow-hidden">
           {/* Animated background elements */}
           <div className="absolute inset-0 z-0">
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-violet-50 via-indigo-50 to-purple-50"></div>
+            
+           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-violet-50 via-indigo-50 to-purple-50"></div>
             <div className="absolute top-20 left-20 w-64 h-64 rounded-full bg-pink-300/20 blur-3xl"></div>
             <div className="absolute bottom-20 right-20 w-80 h-80 rounded-full bg-blue-300/20 blur-3xl"></div>
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-violet-300/20 blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent"></div> 
             <svg className="absolute bottom-0 left-0 right-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
               <path fill="#ffffff" fillOpacity="1" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
             </svg>
+            <div className="absolute top-10 right-0 transform -translate-x-1/2 -translate-y-1/2 animate-spin-very-slow">
+        <svg
+          width="30"
+          height="200"
+          viewBox="0 0 100 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="animate-spin"
+        >
+          <rect x="45" y="10" width="10" height="80" fill="lime" />
+          <rect x="10" y="45" width="80" height="10" fill="lime" />
+        </svg>
+      </div>
+      <div className="absolute top-[30px] left-[150px] opacity-30 animate-in ">
+        <svg width="200" height="200" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="20" fill="orange" />
+       
+        </svg>
+      </div>
           </div>
         
           <div className="container px-4 md:px-6 relative z-10">
@@ -141,9 +183,9 @@ export default function Home() {
                       className="space-y-2"
                     >
                       <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600">
-                        Quick & Easy Loans for Everyone
+                      Quick & Easy Loans for Everyone
                       </h1>
-                      <p className="max-w-[600px] text-slate-700 md:text-xl">
+                      <p className="max-w-[600px] text-slate-600 md:text-xl">
                         Get instant loans with minimal documentation. Apply online and receive funds within 24 hours.
                       </p>
                     </motion.div>
@@ -154,7 +196,7 @@ export default function Home() {
                       className="flex flex-col gap-2 min-[400px]:flex-row"
                     >
                       <Link href="/login">
-                        <Button size="lg" className="gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-violet-500/30">
+                        <Button size="lg" className="gap-1.5  from-violet-150 to-violet-150 transition-all duration-300 shadow-lg hover:shadow-violet-500/30">
                           Apply Now 
                           <motion.div
                             animate={{ x: [0, 5, 0] }}
@@ -165,7 +207,7 @@ export default function Home() {
                         </Button>
                       </Link>
                       <Link href="#services">
-                        <Button size="lg" variant="outline" className="border-violet-600 text-violet-600 hover:bg-violet-600/10 transition-all duration-300">
+                        <Button size="lg" variant="outline" className="from-violet-150 to-violet-150  transition-all duration-300">
                           Learn More
                         </Button>
                       </Link>
@@ -270,11 +312,11 @@ export default function Home() {
                 transition={{ duration: 0.7 }}
                 className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
               >
-                <div className="inline-block rounded-full bg-violet-600/10 px-3 py-1 text-sm font-medium text-violet-600 mb-4">
+                <div className="inline-block rounded-full text-green-500 px-3 py-1 text-sm font-medium  mb-4">
                   Our Services
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600">Tailored Loan Solutions</h2>
+                  <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-gray-700">Tailored Loan Solutions</h2>
                   <p className="max-w-[900px] text-slate-700 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                     We offer customized loan options designed to meet your specific financial needs
                   </p>
@@ -289,14 +331,14 @@ export default function Home() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.1 }}
-                    className="group relative overflow-hidden rounded-2xl border bg-white p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="group relative overflow-hidden rounded-2xl border bg-white p-8 shadow-lg  hover:shadow-xl transition-all duration-300"
                     whileHover={{ y: -5 }}
                   >
                     <div className="absolute top-0 right-0 h-20 w-20 bg-gradient-to-bl from-violet-600/20 to-transparent rounded-bl-3xl"></div>
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#44ce6f] text-white shadow-md mb-6 group-hover:scale-110 transition-transform duration-300">
                       <GraduationCap className="h-8 w-8" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3 text-violet-800">Student Loans</h3>
+                    <h3 className="text-xl font-bold mb-3 text-gray-700">Student Loans</h3>
                     <p className="text-slate-600 mb-6">
                       Low-interest loans for students pursuing higher education with flexible repayment options.
                     </p>
@@ -315,9 +357,11 @@ export default function Home() {
                       </li>
                     </ul>
                     <Link href="/login">
-                      <Button variant="outline" className="w-full group-hover:bg-gradient-to-r group-hover:from-violet-600 group-hover:to-indigo-600 group-hover:text-white transition-all duration-300 border-violet-600 text-violet-600">
-                        Apply Now
-                      </Button>
+                    <button className="relative z-10 px-3 py-2 rounded-md text-white font-semibold overflow-hidden border bg-violet-150 bg-opacity-100 transition-all duration-300">
+       Apply Now
+        <span className="absolute bottom-0 left-[-10%] w-0 h-[120%] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+        <span className="absolute bottom-0 right-[-10%] w-0 h-[120%] border-[#1ea664] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+      </button>
                     </Link>
                   </motion.div>
                   
@@ -332,7 +376,7 @@ export default function Home() {
                     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-md mb-6 group-hover:scale-110 transition-transform duration-300">
                       <Briefcase className="h-8 w-8" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3 text-indigo-800">Employee Loans</h3>
+                    <h3 className="text-xl font-bold mb-3 text-gray-700">Employee Loans</h3>
                     <p className="text-slate-600 mb-6">
                       Quick personal loans for employed individuals with competitive interest rates.
                     </p>
@@ -351,9 +395,11 @@ export default function Home() {
                       </li>
                     </ul>
                     <Link href="/login">
-                      <Button variant="outline" className="w-full group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-blue-600 group-hover:text-white transition-all duration-300 border-indigo-600 text-indigo-600">
-                        Apply Now
-                      </Button>
+                    <button className="relative z-10 px-3 py-2 rounded-md text-white font-semibold overflow-hidden border bg-[#1ea664] bg-opacity-100 transition-all duration-300">
+       Apply Now
+        <span className="absolute bottom-0 left-[-10%] w-0 h-[120%]  bg-violet-150 skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+        <span className="absolute bottom-0 right-[-10%] w-0 h-[120%] border-violet-150 bg-violet-150 skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+      </button>
                     </Link>
                   </motion.div>
                   
@@ -365,10 +411,10 @@ export default function Home() {
                     whileHover={{ y: -5 }}
                   >
                     <div className="absolute top-0 right-0 h-20 w-20 bg-gradient-to-bl from-purple-600/20 to-transparent rounded-bl-3xl"></div>
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-md mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#44ce6f] to-pink-600 text-white shadow-md mb-6 group-hover:scale-110 transition-transform duration-300">
                       <Users className="h-8 w-8" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3 text-purple-800">Business Loans</h3>
+                    <h3 className="text-xl font-bold mb-3 text-gray-700">Business Loans</h3>
                     <p className="text-slate-600 mb-6">
                       Financing solutions for businesses of all sizes to support growth and operations.
                     </p>
@@ -387,9 +433,11 @@ export default function Home() {
                       </li>
                     </ul>
                     <Link href="/login">
-                      <Button variant="outline" className="w-full group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-pink-600 group-hover:text-white transition-all duration-300 border-purple-600 text-purple-600">
-                        Apply Now
-                      </Button>
+                    <button className="relative z-10 px-3 py-2 rounded-md text-white font-semibold overflow-hidden border bg-violet-150 bg-opacity-100 transition-all duration-300">
+       Apply Now
+        <span className="absolute bottom-0 left-[-10%] w-0 h-[120%] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+        <span className="absolute bottom-0 right-[-10%] w-0 h-[120%] border-[#1ea664] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+      </button>
                     </Link>
                   </motion.div>
                 </>
@@ -418,10 +466,10 @@ export default function Home() {
               transition={{ duration: 0.7 }}
               className="text-center mb-16"
             >
-              <div className="inline-block rounded-full bg-violet-600/10 px-3 py-1 text-sm font-medium text-violet-600 mb-4">
+              <div className="inline-block rounded-full  px-3 py-1 text-sm font-medium bg-[#44ce6f] mb-4">
                 Why Choose Us
               </div>
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 mb-4">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-gray-800 mb-4">
                 The LoanEase Advantage
               </h2>
               <p className="max-w-[800px] mx-auto text-slate-700 md:text-xl">
@@ -444,7 +492,7 @@ export default function Home() {
                     1
                   </div>
                   <div className="pt-6">
-                    <h3 className="text-xl font-bold text-violet-800 mb-3">Quick Approval</h3>
+                    <h3 className="text-xl font-bold text-gray-800 mb-3">Quick Approval</h3>
                     <p className="text-slate-600">
                       Our streamlined process ensures you get loan approval in as little as 24 hours, with minimal paperwork and hassle.
                     </p>
@@ -464,7 +512,7 @@ export default function Home() {
                     2
                   </div>
                   <div className="pt-6">
-                    <h3 className="text-xl font-bold text-indigo-800 mb-3">Competitive Rates</h3>
+                    <h3 className="text-xl font-bold text-gray-800 mb-3">Competitive Rates</h3>
                     <p className="text-slate-600">
                       Enjoy some of the most competitive interest rates in the market, starting from just 8.5% per annum.
                     </p>
@@ -484,7 +532,7 @@ export default function Home() {
                     3
                   </div>
                   <div className="pt-6">
-                    <h3 className="text-xl font-bold text-blue-800 mb-3">Flexible Repayment</h3>
+                    <h3 className="text-xl font-bold text-gray-800 mb-3">Flexible Repayment</h3>
                     <p className="text-slate-600">
                       Choose from a variety of repayment options that fit your budget and financial situation perfectly.
                     </p>
@@ -503,25 +551,25 @@ export default function Home() {
             >
               <div className="grid md:grid-cols-2 gap-8 items-center">
                 <div>
-                  <h3 className="text-2xl font-bold text-violet-800 mb-4">Our Commitment to You</h3>
+                  <h3 className="text-2xl font-bold  mb-4">Our Commitment to You</h3>
                   <p className="text-slate-700 mb-6">
                     At LoanEase, we're committed to providing a seamless, transparent, and customer-focused lending experience. Our team of financial experts is dedicated to helping you achieve your goals.
                   </p>
                   <ul className="space-y-3">
                     <li className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 flex items-center justify-center text-white">
+                      <div className="w-8 h-8 rounded-full bg-[#44ce6f] flex items-center justify-center text-white">
                         <CheckCircle2 className="h-4 w-4" />
                       </div>
                       <span className="text-slate-700">Dedicated customer support 7 days a week</span>
                     </li>
                     <li className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 flex items-center justify-center text-white">
+                      <div className="w-8 h-8 rounded-full bg-[#44ce6f]  flex items-center justify-center text-white">
                         <CheckCircle2 className="h-4 w-4" />
                       </div>
                       <span className="text-slate-700">100% digital application process</span>
                     </li>
                     <li className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 flex items-center justify-center text-white">
+                      <div className="w-8 h-8 rounded-full bg-[#44ce6f]  flex items-center justify-center text-white">
                         <CheckCircle2 className="h-4 w-4" />
                       </div>
                       <span className="text-slate-700">No hidden fees or charges</span>
@@ -538,8 +586,11 @@ export default function Home() {
                     height={400}
                     className="rounded-2xl object-cover shadow-xl relative z-10"
                   />
+                
                 </div>
+                
               </div>
+              
             </motion.div>
           )}
         </div>
@@ -553,7 +604,7 @@ export default function Home() {
       </div>
 
       {/* FAQ Section */}
-      <section id="faq" ref={sectionRefs.faq} className="w-full py-2 bg-violet-50 relative">
+      {/* <section id="faq" ref={sectionRefs.faq} className="w-full py-2 bg-violet-50 relative">
         <div className="absolute top-20 left-20 w-72 h-72 bg-purple-300/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-20 w-72 h-72 bg-indigo-300/20 rounded-full blur-3xl"></div>
         
@@ -597,6 +648,7 @@ export default function Home() {
                     question: "What are the interest rates?",
                     answer: "Interest rates vary based on the loan type, amount, and your credit profile. You can use our loan calculator to get an estimate. Our rates start from 8.5% per annum."
                   }
+                  
                 ].map((faq, index) => (
                   <motion.div
                     key={index}
@@ -636,7 +688,7 @@ export default function Home() {
                 transition={{ duration: 0.7, delay: 0.6 }}
                 className="mt-8 text-center"
               >
-                <Link href="/faq">
+                <Link href="#faq">
                   <Button variant="outline" className="border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white transition-all duration-300">
                     View All FAQs
                   </Button>
@@ -645,7 +697,8 @@ export default function Home() {
             )}
           </div>
         </div>
-      </section>
+      </section> */}
+      <HOMEFAQ />
 
       {/* Wave Divider */}
       <div className="relative h-24 bg-gradient-to-b from-violet-50 to-white">
@@ -667,11 +720,11 @@ export default function Home() {
               transition={{ duration: 0.7 }}
               className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
             >
-              <div className="inline-block rounded-full bg-violet-600/10 px-3 py-1 text-sm font-medium text-violet-600 mb-4">
+              <div className="inline-block rounded-full bg-violet-600/10 px-3 py-1 text-sm font-medium bg-[#44ce6f] mb-4">
                 Get in Touch
               </div>
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600">Contact Us</h2>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-gray-700">Contact Us</h2>
                 <p className="max-w-[900px] text-slate-700 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                   Have questions? Our team is here to help you
                 </p>
@@ -689,7 +742,7 @@ export default function Home() {
                   className="space-y-4"
                 >
                   <div className="rounded-xl border bg-white p-6 shadow-md hover:shadow-lg transition-all duration-300">
-                    <h3 className="text-xl font-bold text-violet-800 mb-4">Contact Information</h3>
+                    <h3 className="text-xl font-bold text-gray-700 mb-4">Contact Information</h3>
                     <div className="mt-4 space-y-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-600">
@@ -699,7 +752,7 @@ export default function Home() {
                         </div>
                         <div>
                           <p className="text-sm text-slate-500">Phone</p>
-                          <p className="font-medium">+1 (555) 123-4567</p>
+                          <Link href="tel:+916305490580">+91 6305490580</Link>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -711,7 +764,13 @@ export default function Home() {
                         </div>
                         <div>
                           <p className="text-sm text-slate-500">Email</p>
-                          <p className="font-medium">support@loanease.com</p>
+                          <Link
+                               href="https://mail.google.com/mail/?view=cm&fs=1&to=info@sklassics.com"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                              >
+                               info@sklassics.com
+                           </Link>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -723,14 +782,14 @@ export default function Home() {
                         </div>
                         <div>
                           <p className="text-sm text-slate-500">Address</p>
-                          <p className="font-medium">123 Finance Street, New York, NY 10001</p>
+                          <p className="font-medium">Gopal Reddy Nagar, Near Vampuguda, Kapra  </p>
                         </div>
                       </div>
                     </div>
                   </div>
                   
                   <div className="rounded-xl border bg-white p-6 shadow-md hover:shadow-lg transition-all duration-300">
-                    <h3 className="text-xl font-bold text-violet-800 mb-4">Business Hours</h3>
+                    <h3 className="text-xl font-bold text-gray-700 mb-4">Business Hours</h3>
                     <div className="mt-4 space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">Monday - Friday:</span>
@@ -748,45 +807,61 @@ export default function Home() {
                   </div>
                 </motion.div>
                 
-                <motion.div 
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.7, delay: 0.2 }}
-                  className="rounded-xl border bg-white p-6 shadow-md hover:shadow-lg transition-all duration-300"
-                >
-                  <h3 className="text-xl font-bold text-violet-800 mb-4">Send us a Message</h3>
-                  <form className="space-y-4">
-                    <div className="grid gap-2">
-                      <label htmlFor="name" className="text-sm font-medium">Name</label>
-                      <input
-                        id="name"
-                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/50 outline-none transition-colors"
-                        placeholder="Your name"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <label htmlFor="email" className="text-sm font-medium">Email</label>
-                      <input
-                        id="email"
-                        type="email"
-                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/50 outline-none transition-colors"
-                        placeholder="Your email"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <label htmlFor="message" className="text-sm font-medium">Message</label>
-                      <textarea
-                        id="message"
-                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/50 outline-none transition-colors"
-                        placeholder="Your message"
-                        rows={4}
-                      ></textarea>
-                    </div>
-                    <Button className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 transition-all duration-300">
-                      Send Message
-                    </Button>
-                  </form>
-                </motion.div>
+                <motion.div
+        initial={{ opacity: 0, x: 30 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.7, delay: 0.2 }}
+        className="rounded-xl border bg-white p-6 shadow-md hover:shadow-lg transition-all duration-300"
+      >
+        <h3 className="text-xl font-bold text-gray-700 mb-4">Send us a Message</h3>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="grid gap-2">
+            <label htmlFor="name" className="text-sm font-medium">
+              Name
+            </label>
+            <input
+              id="name"
+              name="name"
+              required
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/50 outline-none transition-colors"
+              placeholder="Your name"
+            />
+          </div>
+          <div className="grid gap-2">
+            <label htmlFor="email" className="text-sm font-medium">
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/50 outline-none transition-colors"
+              placeholder="Your email"
+            />
+          </div>
+          <div className="grid gap-2">
+            <label htmlFor="message" className="text-sm font-medium">
+              Message
+            </label>
+            <textarea
+              id="message"
+              name="message"
+              required
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/50 outline-none transition-colors"
+              placeholder="Your message"
+              rows={4}
+            ></textarea>
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-4 py-2 rounded transition-all duration-300"
+          >
+            Send Message
+          </button>
+        </form>
+      </motion.div>
+    
               </>
             )}
           </div>
@@ -795,11 +870,32 @@ export default function Home() {
     </main>
     
     {/* Footer */}
-    <footer className="border-t bg-gradient-to-r from-violet-50 to-indigo-50">
-      <div className="container flex flex-col gap-4 py-10 md:flex-row md:gap-8 md:py-12">
+    <footer className="relative bg-[url('/assets/map.png')]  bg-cover bg-center bg-no-repeat text-gray-700 py-10">
+    <div className="absolute top-10 right-0 transform -translate-x-1/2 -translate-y-1/2 animate-spin-very-slow">
+        <svg
+          width="30"
+          height="200"
+          viewBox="0 0 100 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="animate-spin"
+        >
+          <rect x="45" y="10" width="10" height="80" fill="lime" />
+          <rect x="10" y="45" width="80" height="10" fill="lime" />
+        </svg>
+      </div>
+      <div className="absolute top-[30px] left-[150px] opacity-30 animate-in ">
+        <svg width="200" height="200" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="20" fill="orange" />
+       
+        </svg>
+      </div>
+          <div className="container flex flex-col gap-4 py-10 md:flex-row md:gap-8 md:py-12 ">
+            
         <div className="flex flex-col gap-2 md:gap-4 lg:gap-6">
+
           <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-            <div className="relative h-8 w-8 overflow-hidden rounded-md bg-gradient-to-br from-violet-600 to-indigo-600">
+            <div className="relative h-8 w-8 overflow-hidden rounded-md   bg-[url('/assets/map.png')] bg-cover bg-center">
               <div className="absolute inset-0 flex items-center justify-center text-white font-bold">
                 L
               </div>
@@ -834,6 +930,7 @@ export default function Home() {
                 <circle cx="4" cy="4" r="2"></circle>
               </svg>
             </Link>
+            
           </div>
         </div>
         <div className="grid flex-1 grid-cols-2 gap-8 sm:grid-cols-4">
@@ -862,6 +959,7 @@ export default function Home() {
               </li>
             </ul>
           </div>
+         
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-indigo-800 md:text-base">Resources</h3>
             <ul className="space-y-2 text-sm">
@@ -939,7 +1037,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className="border-t py-6 bg-gradient-to-r from-violet-100/50 to-indigo-100/50">
+      <div className="border-t ">
         <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
           <p className="text-sm text-slate-600">© {new Date().getFullYear()} LoanEase. All rights reserved.</p>
           <div className="flex gap-4">
