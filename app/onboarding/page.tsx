@@ -28,42 +28,56 @@ export default function OnboardingPage() {
   const [userImage, setUserImage] = useState<File | null>(null)
   const [imageError, setImageError] = useState<string | null>(null)
   const saveDetails = useProfileStore((state) => state.savePersonalDetailsAction)
+  const uploadImage = useProfileStore((state) => state.uploadProfileImageAction)
 
-  const handleNext = async(data: any) => {
+  const handleNext = async (data: any, idImage?: File) => {
     if (step === 1) {
-      // Check if user image is uploaded
-      if (!userImage) {
-        setImageError("Please upload your profile image")
-        return
-      }
-
-      setFormData((prev) => ({ ...prev, personalInfo: data, userImage }))
-      setStep(2)
-      window.scrollTo(0, 0)
+      setFormData((prev) => ({ ...prev, personalInfo: data, userImage }));
+      setStep(2);
+      window.scrollTo(0, 0);
     } else if (step === 2) {
-      setFormData((prev) => ({ ...prev, addressInfo: data }))
-      setStep(3)
-      window.scrollTo(0, 0)
+      setFormData((prev) => ({ ...prev, addressInfo: data }));
+      setStep(3);
+      window.scrollTo(0, 0);
     } else if (step === 3) {
-      setFormData((prev) => ({ ...prev, employmentInfo: data }))
-      setIsComplete(true)
-      // Here you would typically submit the complete form data to your API
-      console.log("Complete form data:", { ...formData, employmentInfo: data })
-      const req = await transformFormData({ ...formData, employmentInfo: data })
-      const response:any = await saveDetails(req)
-      if(response?.status === 200) {
-        setIsComplete(true)
-      }else{
-        toast.error(response?.message)
+      setFormData((prev) => ({ ...prev, employmentInfo: data }));
+  
+      // Transform form data
+      let transformedData = transformFormData({ ...formData });
+      let empData = null;
+      const formDataObj = new FormData();
+  
+      if (data?.employmentType === "employee") {
+        formDataObj.append("employee_id_card", idImage || "");
+        empData = transformEmpData(data);
+      } else if (data?.employmentType === "student") {
+        formDataObj.append("student_id_card", idImage || "");
+        empData = transformStudentData(data);
+      }
+  
+      formDataObj.append("data",JSON.stringify({ ...transformedData, ...empData }));  
+      console.log(transformedData, "transformedData");
+  
+      try {
+        const response: any = await saveDetails(formDataObj);
+        if (response?.status === 200) {
+          setIsComplete(true);
+        } else {
+          toast.error(response?.message);
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        toast.error("Failed to submit the form.");
       }
     }
-  }
+  };
+  
 
   function transformFormData(formData : any) {
     const transformedData = {
       first_name: formData.personalInfo.firstName,
       last_name: formData.personalInfo.lastName,
-      date_of_birth: formData.personalInfo.dateOfBirth,
+      date_of_birth: formData.personalInfo.dateOfBirth?.toISOString().split('T')[0],
       gender: formData.personalInfo.gender.charAt(0).toUpperCase() + formData.personalInfo.gender.slice(1),
       marital_status: formData.personalInfo.maritalStatus.charAt(0).toUpperCase() + formData.personalInfo.maritalStatus.slice(1),
       father_name: formData.personalInfo.fatherName,
@@ -71,14 +85,30 @@ export default function OnboardingPage() {
       pincode: formData.addressInfo.pincode,
       country : 'India',
       alternate_number: formData.addressInfo.alternatePhone,
-      employment_type: formData.employmentInfo.employmentType.charAt(0).toUpperCase() + formData.employmentInfo.employmentType.slice(1),
-      annual_income: parseInt(formData.employmentInfo.annualIncome),
-      company_id: formData.employmentInfo.employmentId,
-      company_address: formData.employmentInfo.companyAddress,
-      company_name: formData.employmentInfo.companyName,
-     
+
     };
     return transformedData;
+  }
+
+
+  function transformStudentData( formData : any ){
+    const data = {
+      employment_type: formData.employmentType,
+      student_id: formData.studentId,
+      student_address: formData.campusAddress,
+      annual_income: parseInt(formData.annualIncome),
+    };
+    return data
+  }
+
+  function transformEmpData(formData : any){
+    const data = {
+      employment_type: formData.employmentType,
+      company_id: formData.employeeId,
+      company_address: formData.officeAddress,
+      annual_income: parseInt(formData.annualIncome),
+    }
+    return data
   }
 
   const handleBack = () => {
@@ -206,7 +236,7 @@ export default function OnboardingPage() {
                 <AddressForm onSubmit={handleNext} onBack={handleBack} initialData={formData.addressInfo} />
               )}
               {step === 3 && (
-                <EmploymentForm onSubmit={handleNext} onBack={handleBack} initialData={formData.employmentInfo} />
+                <EmploymentForm onSubmit={handleNext} onBack={handleBack} />
               )}
             </motion.div>
           )}

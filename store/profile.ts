@@ -12,7 +12,7 @@ export const useProfileStore = create<IProfileState>()(
     persist(
         (set)=>({
             ...initialState,
-            savePersonalDetailsAction : async (payload : IProfileReq) => {
+            savePersonalDetailsAction : async (payload : any) => {
                 const response: IResponse<any> = await http.post('/api/save-personal-details', payload)
                 return response
             },
@@ -30,6 +30,17 @@ export const useProfileStore = create<IProfileState>()(
             },
             verifyBankDetailsAction : async (payload : IVerBankReq) => {
                 const response: IResponse<any> = await http.post('/api/bank-details/verify-otp', payload)
+                return response
+            },
+            uploadProfileImageAction : async (payload : any) => {
+                const formData = new FormData()
+                formData.append('selfie_image', payload)
+
+                const response: IResponse<any> = await http.post('/selfie/upload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
                 return response
             }
         }),
