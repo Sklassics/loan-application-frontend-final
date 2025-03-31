@@ -129,7 +129,7 @@ export default function KycVerificationPage() {
       formData.append("pancardNumber",  panForm.getValues().panNumber)
       formData.append("otp", values.otp || '123456')
       const otpResult : any = await axios.post(
-        process.env.NEXT_PUBLIC_BASE_URL + "/api/pancard/create",
+        process.env.NEXT_PUBLIC_BASE_URL + "/api/verify-upload",
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
