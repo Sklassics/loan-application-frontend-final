@@ -13,7 +13,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { FileUploader } from "@/components/kyc/file-uploader"
 import { Loader2, AlertCircle, CheckCircle, ArrowRight } from "lucide-react"
-import { verifyKyc, verifyOtp } from "@/lib/api/kyc-api"
+import { verifyKyc } from "@/lib/api/kyc-api"
+import { useProfileStore } from "@/store/profile"
+import axios from "axios"
 
 // PAN form schema
 const panFormSchema = z.object({
@@ -38,6 +40,8 @@ export default function KycVerificationPage() {
   const [showOtpScreen, setShowOtpScreen] = useState(false)
   const [otpSent, setOtpSent] = useState(false)
   const [otpResendTimer, setOtpResendTimer] = useState(30)
+  const sendPanOtp = useProfileStore((state) => state.sendPanOtpAction);
+  const verifyPanOtp = useProfileStore((state) => state.verifyPanOtpAction);
 
   // PAN form
   const panForm = useForm<z.infer<typeof panFormSchema>>({
@@ -75,14 +79,14 @@ export default function KycVerificationPage() {
       formData.append("panNumber", values.panNumber)
       console.log(panImage,values.panNumber,"formData")
       let req = {
-        panImage,
-        panNumber: values.panNumber
+        pancardNumber: values.panNumber
       }
 
       // Call KYC verification API
-      const verificationResult = await verifyKyc(formData)
+      // const verificationResult = await verifyKyc(formData)
+      const verificationResult = await sendPanOtp(req);
 
-      if (verificationResult.success) {
+      if (verificationResult.status == 200 ) {
         setIsSubmitting(false)
         setShowOtpScreen(true)
         setOtpSent(true)
@@ -112,12 +116,27 @@ export default function KycVerificationPage() {
   const onOtpSubmit = async (values: z.infer<typeof otpFormSchema>) => {
     setIsSubmitting(true)
     setVerificationStatus("idle")
-
     try {
+      if(!panImage){
+        setErrorMessage("Please upload your PAN card image")
+        return
+      }
       // Call OTP verification API
-      const otpResult = await verifyOtp(values.otp)
+      const token = localStorage.getItem("auth_token");
+      const formData = new FormData()
+      formData.append("pan_card_image", panImage)
+      formData.append("pancardNumber",  panForm.getValues().panNumber)
+      formData.append("otp", values.otp || '123456')
+      const otpResult : any = await axios.post(
+        process.env.NEXT_PUBLIC_BASE_URL + "/api/pancard/create",
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      // const otpResult = await verifyPanOtp(formData)
 
-      if (otpResult.success) {
+      if (otpResult.status == 200) {
         setVerificationStatus("success")
         // Redirect to eligibilthy page after 2 seconds
         setTimeout(() => {

@@ -20,7 +20,7 @@ export const useProfileStore = create<IProfileState>()(
                 const response: IResponse<any> = await http.post('/api/pancard/sendOtp', payload)
                 return response
             },
-            verifyPanOtpAction : async (payload : IPanReq) => {
+            verifyPanOtpAction : async (payload : any) => {
                 const response: IResponse<any> = await http.post('/api/pancard/create', payload)
                 return response
             },

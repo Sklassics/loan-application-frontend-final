@@ -5,7 +5,7 @@
  * @param formData Form data containing KYC information
  * @returns Promise with verification result
  */
-export const verifyKyc = async (formData: FormData): Promise<{ success: boolean; message?: string }> => {
+export const verifyKyc = async (formData: FormData): Promise<{ success: boolean; message?: string; status: number }> => {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 2000))
   
@@ -19,6 +19,7 @@ export const verifyKyc = async (formData: FormData): Promise<{ success: boolean;
     if (!isValidPan) {
       return {
         success: false,
+        status: 400,
         message: "Invalid PAN format. Please check and try again.",
       }
     }
@@ -27,6 +28,7 @@ export const verifyKyc = async (formData: FormData): Promise<{ success: boolean;
     // For demo purposes, we'll simulate a successful response
     return {
       success: true,
+      status: 200,
       message: "KYC verification successful",
     }
   }
