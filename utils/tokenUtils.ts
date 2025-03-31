@@ -8,6 +8,7 @@ const TOKEN_KEY = "auth_token"
 export const setToken = (token: string): void => {
   if (typeof window !== "undefined") {
     localStorage.setItem(TOKEN_KEY, token)
+    document.cookie = `token=${token}; path=/; secure; samesite=strict;`
   }
 }
 

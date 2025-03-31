@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { getToken } from "./utils/tokenUtils"
 
 // Define protected routes that require authentication
 const protectedRoutes = [
@@ -20,7 +19,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Get the token from the cookies
-  const token = request.cookies.get("auth_token")?.value || getToken()
+  const token = request.cookies.get("token")?.value
 
   // Check if the route is protected
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
