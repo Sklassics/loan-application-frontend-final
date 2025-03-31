@@ -12,10 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Loader2, AlertCircle, CheckCircle, Building, User, CreditCard, ArrowRight, Phone, MapPin } from "lucide-react"
-import { verifyBankAccount, verifyOtp } from "@/lib/api/bank-api"
-import { sendOtp } from "@/lib/api/bank-api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
 import { useProfileStore } from "@/store/profile";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -38,12 +35,6 @@ const bankFormSchema = z.object({
     .refine((val) => /^\d+$/.test(val), {
       message: "Account number must contain only digits",
     }),
-  ifscCode: z.string().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, {
-    message: "IFSC code must be in the format ABCD0123456",
-  }),
-  accountType: z.enum(["savings", "current", "salary"], {
-    message: "Please select a valid account type",
-  }),
   mobileNumber: z
     .string()
     .length(10, { message: "Mobile number must be exactly 10 digits" })
@@ -56,6 +47,7 @@ export default function BankVerificationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [verificationStatus, setVerificationStatus] = useState<"idle" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState("")
+  const sendOtp = useProfileStore((state)=> state.sendBankDetailsAction)
 
   // Bank form
   const bankForm = useForm<z.infer<typeof bankFormSchema>>({
@@ -64,8 +56,8 @@ export default function BankVerificationPage() {
       fullName: "",
       bankName: "",
       accountNumber: "",
-      ifscCode: "",
-      accountType: "savings",
+      mobileNumber: "",
+      address: "",
     },
   });
 
@@ -85,12 +77,30 @@ export default function BankVerificationPage() {
     },
   })
 
+//   8.1.Send OTP
+// POST https://loanapp-x5qm.onrender.com/api/bank-details/send-otp
+// Headers:
+// {
+//   "Authorization": "Bearer your_jwt_token"
+// }
+
+// Request Body:
+// {
+//     "fullName": "John Doe",
+//     "bankName": "XYZ Bank",
+//     "address": "123 Bank Street, City, Country",
+//     "accountNumber": "1234567890",
+//     "mobileNumber": "9876543210"
+// }
+
+
   const onBankSubmit = async (values: z.infer<typeof bankFormSchema>) => {
     setIsSubmitting(true)
     setVerificationStatus("idle")
 
     try {
       // Call bank verification API
+      console.log(values,"values")
       const verificationResult = await sendOtp(values);
 
       if (verificationResult.success) {
@@ -229,27 +239,6 @@ export default function BankVerificationPage() {
 
                     <FormField
                       control={bankForm.control}
-                      name="ifscCode"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>IFSC Code</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                              <Input
-                                placeholder="e.g., SBIN0123456"
-                                {...field}
-                                className="pl-10 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={bankForm.control}
                       name="mobileNumber"
                       render={({ field }) => (
                         <FormItem>
@@ -264,29 +253,6 @@ export default function BankVerificationPage() {
                               />
                             </div>
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={bankForm.control}
-                      name="accountType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Account Type</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400">
-                                <SelectValue placeholder="Select account type" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="savings">Savings Account</SelectItem>
-                              <SelectItem value="current">Current Account</SelectItem>
-                              <SelectItem value="salary">Salary Account</SelectItem>
-                            </SelectContent>
-                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
