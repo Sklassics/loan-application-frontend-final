@@ -29,6 +29,7 @@ export const getToken = (): string | null => {
 export const removeToken = (): void => {
   if (typeof window !== "undefined") {
     localStorage.removeItem(TOKEN_KEY)
+    document.cookie = `token=; path=/; secure; samesite=strict;`
   }
 }
 

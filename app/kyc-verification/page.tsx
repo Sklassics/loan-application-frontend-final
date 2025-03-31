@@ -16,6 +16,7 @@ import { Loader2, AlertCircle, CheckCircle, ArrowRight } from "lucide-react"
 import { verifyKyc } from "@/lib/api/kyc-api"
 import { useProfileStore } from "@/store/profile"
 import axios from "axios"
+import { getToken } from "@/utils/tokenUtils"
 
 // PAN form schema
 const panFormSchema = z.object({
@@ -75,16 +76,16 @@ export default function KycVerificationPage() {
     try {
       // Create FormData for API call
       const formData = new FormData()
-      formData.append("panCard", panImage)
-      formData.append("panNumber", values.panNumber)
-      console.log(panImage,values.panNumber,"formData")
-      let req = {
-        pancardNumber: values.panNumber
-      }
-
-      // Call KYC verification API
+      formData.append("pancardNumber", values.panNumber)
       // const verificationResult = await verifyKyc(formData)
-      const verificationResult = await sendPanOtp(req);
+      const token = getToken();
+      const verificationResult : any = await axios.post(
+        process.env.NEXT_PUBLIC_BASE_URL + "/api/pancard/sendOtp",
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (verificationResult.status == 200 ) {
         setIsSubmitting(false)
