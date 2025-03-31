@@ -2,11 +2,12 @@ import { IResponse } from "./ICommonStore"
 
 export interface IProfileState {
     profileState : any
-    savePersonalDetailsAction : (payload : IProfileReq) => void
-    sendPanOtpAction : (payload : any) => void
-    verifyPanOtpAction : (payload : IPanReq) => void
+    savePersonalDetailsAction : (payload : any) => void
+    sendPanOtpAction : (payload : any) => Promise<IResponse<any>>
+    verifyPanOtpAction : (payload : IPanReq) => Promise<IResponse<any>>
     sendBankDetailsAction : (payload : IBankReq) =>  Promise<IResponse<any>>
     verifyBankDetailsAction : (payload : IVerBankReq) => Promise<IResponse<any>>
+    uploadProfileImageAction : (payload : any) => Promise<IResponse<any>>
 }
 
 export interface IProfileReq{

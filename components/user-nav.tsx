@@ -15,10 +15,17 @@ import {
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { LogOut, User, Settings, LayoutDashboard } from "lucide-react"
+import { useAuthStore } from "@/store/auth"
 
 export function UserNav() {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
+  const logout = useAuthStore((state) => state.logoutAction)
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login")
+  }
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -65,7 +72,7 @@ export function UserNav() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={() => router.push("/")}
+          onClick={handleLogout}
           className="flex items-center cursor-pointer hover:bg-violet-50"
         >
           <LogOut className="mr-2 h-4 w-4 text-violet-600" />

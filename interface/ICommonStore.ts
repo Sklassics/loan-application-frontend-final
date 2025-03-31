@@ -4,5 +4,6 @@ export interface IResponse<T> {
     token?: string,
     message?: string | null;
     error?: any;
+    success?: boolean
   }
   

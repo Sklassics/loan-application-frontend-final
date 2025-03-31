@@ -9,7 +9,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { Loader2, AlertCircle, CheckCircle, IndianRupee, Clock, ArrowRight } from "lucide-react"
 import { useCreditStore } from "@/store/credit"
-import { stat } from "fs"
 
 export default function EligibilityCheckPage() {
   const router = useRouter()
@@ -42,8 +41,8 @@ export default function EligibilityCheckPage() {
         const amount = response?.data?.creditLimit
         setEligibleAmount(amount)
         setCheckStatus("success")
-      } else {
-        setErrorReason("Your credit score is below our threshold. Please try again after 6 months.")
+      } else if(response?.message){
+        setErrorReason(response.message ||"Your credit score is below our threshold. Please try again after 6 months.")
         setCheckStatus("error")
       }
     } catch (error) {

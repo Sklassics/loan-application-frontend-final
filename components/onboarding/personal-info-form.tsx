@@ -181,7 +181,7 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
                         )}
                       >
                         <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400" />
-                        {field.value ? format(field.value, "PPP") : <span>Select your date of birth</span>}
+                        {field.value ? format(field.value, "PPP") : <span className="text-sm">Select your date of birth</span>}
                   </button>
                     </FormControl>
                   </PopoverTrigger>

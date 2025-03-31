@@ -9,13 +9,8 @@ import PersonalInfoForm from "@/components/onboarding/personal-info-form"
 import AddressForm from "@/components/onboarding/address-form"
 import EmploymentForm from "@/components/onboarding/employment-form"
 import { CheckCircle2 } from "lucide-react"
-import Image from "next/image"
-import { FileUploader } from "@/components/kyc/file-uploader"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
-import { useProfileStore } from "@/store/profile"
 import { toast } from "react-toastify"
+import axios from "axios"
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1)
@@ -28,43 +23,63 @@ export default function OnboardingPage() {
   const [isComplete, setIsComplete] = useState(false)
   const [userImage, setUserImage] = useState<File | null>(null)
   const [imageError, setImageError] = useState<string | null>(null)
-  const saveDetails = useProfileStore((state) => state.savePersonalDetailsAction)
 
-  const handleNext = async(data: any) => {
+  const handleNext = async (data: any, idImage?: File) => {
     if (step === 1) {
-      // Check if user image is uploaded
-      if (!userImage) {
-        setImageError("Please upload your profile image")
-        return
+      setFormData((prev) => ({ ...prev, personalInfo: data, userImage }));
+      setStep(2);
+      window.scrollTo(0, 0);
+    } else if (step === 2) {
+      setFormData((prev) => ({ ...prev, addressInfo: data }));
+      setStep(3);
+      window.scrollTo(0, 0);
+    } else if (step === 3) {
+      setFormData((prev) => ({ ...prev, employmentInfo: data }));
+  
+      // Transform form data
+      let transformedData = transformFormData({ ...formData });
+      let empData = null;
+      const formDataObj = new FormData();
+  
+      if (data?.employmentType === "employee") {
+        formDataObj.append("employee_id_card", idImage || "");
+        empData = transformEmpData(data);
+      } else if (data?.employmentType === "student") {
+        formDataObj.append("student_id_card", idImage || "");
+        empData = transformStudentData(data);
       }
 
-      setFormData((prev) => ({ ...prev, personalInfo: data, userImage }))
-      setStep(2)
-      window.scrollTo(0, 0)
-    } else if (step === 2) {
-      setFormData((prev) => ({ ...prev, addressInfo: data }))
-      setStep(3)
-      window.scrollTo(0, 0)
-    } else if (step === 3) {
-      setFormData((prev) => ({ ...prev, employmentInfo: data }))
-      setIsComplete(true)
-      // Here you would typically submit the complete form data to your API
-      console.log("Complete form data:", { ...formData, employmentInfo: data })
-      const req = await transformFormData({ ...formData, employmentInfo: data })
-      const response:any = await saveDetails(req)
-      if(response?.status === 200) {
-        setIsComplete(true)
-      }else{
-        toast.error(response?.message)
+      const finaldata:any = {...transformedData, ...empData}
+      
+      formDataObj.append("data", JSON.stringify(finaldata));  
+  
+      try {
+        const token = localStorage.getItem("auth_token");
+        const response : any = await axios.post(
+          process.env.NEXT_PUBLIC_BASE_URL + "/api/save-personal-details",
+          formDataObj,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        // const response: any = await saveDetails(formDataObj);
+        if (response?.status === 200) {
+          setIsComplete(true);
+        } else {
+          toast.error(response?.message);
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        toast.error("Failed to submit the form.");
       }
     }
-  }
+  };
 
   function transformFormData(formData : any) {
     const transformedData = {
       first_name: formData.personalInfo.firstName,
       last_name: formData.personalInfo.lastName,
-      date_of_birth: formData.personalInfo.dateOfBirth,
+      date_of_birth: formData.personalInfo.dateOfBirth ? new Date(formData.personalInfo.dateOfBirth).toISOString().split('T')[0].split('-').reverse().join('-') : null,
       gender: formData.personalInfo.gender.charAt(0).toUpperCase() + formData.personalInfo.gender.slice(1),
       marital_status: formData.personalInfo.maritalStatus.charAt(0).toUpperCase() + formData.personalInfo.maritalStatus.slice(1),
       father_name: formData.personalInfo.fatherName,
@@ -72,14 +87,29 @@ export default function OnboardingPage() {
       pincode: formData.addressInfo.pincode,
       country : 'India',
       alternate_number: formData.addressInfo.alternatePhone,
-      employment_type: formData.employmentInfo.employmentType.charAt(0).toUpperCase() + formData.employmentInfo.employmentType.slice(1),
-      annual_income: parseInt(formData.employmentInfo.annualIncome),
-      company_id: formData.employmentInfo.employmentId,
-      company_address: formData.employmentInfo.companyAddress,
-      company_name: formData.employmentInfo.companyName,
-     
     };
     return transformedData;
+  }
+
+
+  function transformStudentData( formData : any ){
+    const data = {
+      employment_type: formData.employmentType,
+      student_id: formData.studentId,
+      student_address: formData.campusAddress,
+      annual_income: parseInt(formData.annualIncome),
+    };
+    return data
+  }
+
+  function transformEmpData(formData : any){
+    const data = {
+      employment_type: formData.employmentType,
+      company_id: formData.employeeId,
+      company_address: formData.officeAddress,
+      annual_income: parseInt(formData.annualIncome),
+    }
+    return data
   }
 
   const handleBack = () => {
@@ -166,9 +196,9 @@ export default function OnboardingPage() {
               </p>
               <Button
                 className="bg-violet-150"
-                onClick={() => (window.location.href = "/kyc-verification")}
+                onClick={() => (window.location.href = "/verify-selfie")}
               >
-                KYC Verification
+                Selfie Verification
               </Button>
             </motion.div>
           ) : (
@@ -182,16 +212,15 @@ export default function OnboardingPage() {
             >
               {step === 1 && (
                 <>
-                
-                   <div className="mb-8">
+                  {/* <div className="mb-8">
                     <Label className="block mb-2">Profile Image</Label>
                     <FileUploader
-                        onFileUpload={handleUserImageUpload}
-                        acceptedFileTypes={["image/jpeg", "image/png"]}
-                        maxSize={5 * 1024 * 1024} // 5MB
-                        label="Upload Profile Image"
-                        description="Upload a clear photo of yourself"
-                        icon={"user"}
+                      onFileUpload={handleUserImageUpload}
+                      acceptedFileTypes={["image/jpeg", "image/png"]}
+                      maxSize={5 * 1024 * 1024} // 5MB
+                      label="Upload Profile Image"
+                      description="Upload a clear photo of yourself"
+                      icon="user"
                     />
                     {imageError && (
                       <Alert variant="destructive" className="mt-4">
@@ -200,7 +229,7 @@ export default function OnboardingPage() {
                         <AlertDescription>{imageError}</AlertDescription>
                       </Alert>
                     )}
-                  </div>
+                  </div> */}
                   <PersonalInfoForm onSubmit={handleNext} />
                 </>
               )}
@@ -208,7 +237,7 @@ export default function OnboardingPage() {
                 <AddressForm onSubmit={handleNext} onBack={handleBack} initialData={formData.addressInfo} />
               )}
               {step === 3 && (
-                <EmploymentForm onSubmit={handleNext} onBack={handleBack} initialData={formData.employmentInfo} />
+                <EmploymentForm onSubmit={handleNext} onBack={handleBack} />
               )}
             </motion.div>
           )}
@@ -217,4 +246,3 @@ export default function OnboardingPage() {
     </div>
   )
 }
-
