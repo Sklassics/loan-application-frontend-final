@@ -61,7 +61,7 @@ export default function OnboardingPage() {
       try {
         const token = localStorage.getItem("auth_token");
         const response : any = await axios.post(
-          "https://loanapp-x5qm.onrender.com/api/save-personal-details",
+          process.env.NEXT_PUBLIC_BASE_URL + "/api/save-personal-details",
           formDataObj,
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -201,9 +201,9 @@ export default function OnboardingPage() {
               </p>
               <Button
                 className="bg-violet-150"
-                onClick={() => (window.location.href = "/kyc-verification")}
+                onClick={() => (window.location.href = "/verify-selfie")}
               >
-                KYC Verification
+                Selfie Verification
               </Button>
             </motion.div>
           ) : (
