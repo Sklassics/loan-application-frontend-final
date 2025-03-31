@@ -80,24 +80,15 @@ export default function Home() {
       
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-            <div className="relative h-8 w-8 overflow-hidden rounded-md bg-gradient-to-br from-violet-600 to-indigo-600">
-              <motion.div 
-                initial={{ y: 20 }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="absolute inset-0 flex items-center justify-center text-white font-bold"
-              >
-                L
-              </motion.div>
-            </div>
-            <motion.span
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600"
-            >
-              Logo
-            </motion.span>
+          <motion.img
+                src="/sklassics.png" 
+                alt="Logo"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="w-130 h-10"
+              />
+
           </Link>
           <nav className="hidden md:flex gap-6">
             <Link href="#services" className="text-sm font-medium hover:text-violet-600 transition-colors duration-200 relative group">
