@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { useProfileStore } from "@/store/profile"
 import { toast } from "react-toastify"
+import axios from "axios"
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1)
@@ -27,8 +28,6 @@ export default function OnboardingPage() {
   const [isComplete, setIsComplete] = useState(false)
   const [userImage, setUserImage] = useState<File | null>(null)
   const [imageError, setImageError] = useState<string | null>(null)
-  const saveDetails = useProfileStore((state) => state.savePersonalDetailsAction)
-  const uploadImage = useProfileStore((state) => state.uploadProfileImageAction)
 
   const handleNext = async (data: any, idImage?: File) => {
     if (step === 1) {
@@ -54,12 +53,21 @@ export default function OnboardingPage() {
         formDataObj.append("student_id_card", idImage || "");
         empData = transformStudentData(data);
       }
-  
-      formDataObj.append("data",JSON.stringify({ ...transformedData, ...empData }));  
-      console.log(transformedData, "transformedData");
+
+      const finaldata:any = {...transformedData, ...empData}
+      
+      formDataObj.append("data", JSON.stringify(finaldata));  
   
       try {
-        const response: any = await saveDetails(formDataObj);
+        const token = localStorage.getItem("auth_token");
+        const response : any = await axios.post(
+          "https://loanapp-x5qm.onrender.com/api/save-personal-details",
+          formDataObj,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        // const response: any = await saveDetails(formDataObj);
         if (response?.status === 200) {
           setIsComplete(true);
         } else {
@@ -71,13 +79,12 @@ export default function OnboardingPage() {
       }
     }
   };
-  
 
   function transformFormData(formData : any) {
     const transformedData = {
       first_name: formData.personalInfo.firstName,
       last_name: formData.personalInfo.lastName,
-      date_of_birth: formData.personalInfo.dateOfBirth?.toISOString().split('T')[0],
+      date_of_birth: formData.personalInfo.dateOfBirth ? new Date(formData.personalInfo.dateOfBirth).toISOString().split('T')[0].split('-').reverse().join('-') : null,
       gender: formData.personalInfo.gender.charAt(0).toUpperCase() + formData.personalInfo.gender.slice(1),
       marital_status: formData.personalInfo.maritalStatus.charAt(0).toUpperCase() + formData.personalInfo.maritalStatus.slice(1),
       father_name: formData.personalInfo.fatherName,
@@ -85,7 +92,6 @@ export default function OnboardingPage() {
       pincode: formData.addressInfo.pincode,
       country : 'India',
       alternate_number: formData.addressInfo.alternatePhone,
-
     };
     return transformedData;
   }
@@ -211,7 +217,7 @@ export default function OnboardingPage() {
             >
               {step === 1 && (
                 <>
-                  <div className="mb-8">
+                  {/* <div className="mb-8">
                     <Label className="block mb-2">Profile Image</Label>
                     <FileUploader
                       onFileUpload={handleUserImageUpload}
@@ -228,7 +234,7 @@ export default function OnboardingPage() {
                         <AlertDescription>{imageError}</AlertDescription>
                       </Alert>
                     )}
-                  </div>
+                  </div> */}
                   <PersonalInfoForm onSubmit={handleNext} />
                 </>
               )}
