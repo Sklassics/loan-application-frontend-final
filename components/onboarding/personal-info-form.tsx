@@ -174,16 +174,15 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
-                      <Button
-                        variant={"outline"}
+                   <button
                         className={cn(
-                          "h-14 pl-10 w-full justify-start text-left font-normal border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400",
-                          !field.value && "text-muted-foreground",
+                          "relative h-14 pl-10 w-full justify-start text-left font-normal border rounded-md border-gray-300",
+                          !field.value && "text-muted-foreground"
                         )}
                       >
-                        <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        {field.value ? format(field.value, "PPP") : <span>Select your date of birth</span>}
-                      </Button>
+                        <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400" />
+                        {field.value ? format(field.value, "PPP") : <span className="text-sm">Select your date of birth</span>}
+                  </button>
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
