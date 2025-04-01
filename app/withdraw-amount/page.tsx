@@ -31,6 +31,9 @@ const formSchema = z.object({
     .number()
     .min(3, { message: "Minimum tenure is 3 months" })
     .max(60, { message: "Maximum tenure is 60 months" }),
+  processingFee: z.coerce.number().optional(), // Add processingFee to the schema
+  onboardingFee: z.coerce.number().optional(), // Add onboardingFee to the schema
+  documentationFee: z.coerce.number().optional(), // Add documentationFee to the schema
 })
 
 export default function WithdrawAmountPage() {
@@ -55,62 +58,96 @@ export default function WithdrawAmountPage() {
       ifscCode: "ICIC0000269",
       accountHolderName: "John Doe",
       tenure: 12,
+      documentationFee: 300, // Default documentation fee
     },
   })
 
   // Calculate processing fee (2% of loan amount)
+  const amount = useWatch({ control: form.control, name: "amount" });
+
   useEffect(() => {
-    const amount = form.watch("amount")
-    const fee = Math.round(amount * 0.02)
-    setProcessingFee(fee)
-    setTotalAmount(amount - fee)
-  }, [form.watch("amount")])
+    if (amount !== undefined) {
+      const fee = Math.round(amount * 0.02);
+      setProcessingFee(fee);
+      setTotalAmount(amount - fee);
+    }
+  }, [amount]);
+  
 
   // Calculate EMI
+  const tenure = useWatch({ control: form.control, name: "tenure" });
+  
   useEffect(() => {
-    const amount = useWatch({ control: form.control, name: "amount" })
-    const tenure = useWatch({ control: form.control, name: "tenure" })
-    
-    const monthlyInterestRate = interestRate / 12 / 100
-
-    // EMI = [P x R x (1+R)^N]/[(1+R)^N-1]
+    if (!amount || !tenure || tenure <= 0) {
+      setEmi(0);
+      return;
+    }
+  
+    const monthlyInterestRate = interestRate / 12 / 100;
+    const denominator = Math.pow(1 + monthlyInterestRate, tenure) - 1;
+  
+    if (denominator === 0) {
+      setEmi(0);
+      return;
+    }
+  
     const emiValue =
       (amount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, tenure)) /
-      (Math.pow(1 + monthlyInterestRate, tenure) - 1)
+      denominator;
+  
+    setEmi(Math.round(emiValue));
+  }, [amount, tenure, interestRate]);
 
-    setEmi(Math.round(emiValue))
-  }, [form.watch("amount"), form.watch("tenure"), interestRate])
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsSubmitting(true)
-    setWithdrawStatus("idle")
+  const onSubmit = async (values: { 
+    amount: number; 
+    accountNumber: string; 
+    ifscCode: string; 
+    accountHolderName: string; 
+    tenure: number; 
+  }) => {
+    setIsSubmitting(true);
+    setWithdrawStatus("idle");
+    setErrorMessage("");
   
     try {
-      const response = await fetch("/api/withdraw", {
+      // const token = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoic3R1ZGVudCIsIm1vYmlsZU51bWJlciI6Iis5MTkwNTkxNDI4NjkiLCJzdWIiOiIrOTE5MDU5MTQyODY5IiwiaWF0IjoxNzQzNDg4NTUxLCJleHAiOjE3NDM0OTIxNTF9.rMsQ9BvWKgS7vLGyRxPhqFgdznRvFFau0db1iBG3drI";
+
+      const token = localStorage.getItem("token"); 
+  
+      if (!token) {
+        setWithdrawStatus("error");
+        setErrorMessage("User is not authenticated. Please log in first.");
+        setIsSubmitting(false);
+        return;
+      }
+  
+      const response = await fetch("https://loanapp-x5qm.onrender.com/api/withdraw", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // Attach token dynamically
         },
-        body: JSON.stringify(values),
-      })
+        body: JSON.stringify(values), // Send the withdrawal details
+      });
   
-      const data = await response.json()
+      const data = await response.json();
   
       if (response.ok) {
-        setWithdrawStatus("success")
+        setWithdrawStatus("success");
         setTimeout(() => {
-          router.push(`/transaction-processing?amount=${totalAmount}`)
-        }, 1500)
+          router.push(`/transaction-processing?amount=${values.amount}`);
+        }, 1500);
       } else {
-        throw new Error(data.message || "Withdrawal failed. Please try again.")
+        setWithdrawStatus("error");
+        setErrorMessage(data.message || "Withdrawal failed. Please try again.");
       }
-    } catch (error: any) {
-      setWithdrawStatus("error")
-      setErrorMessage(error.message || "An error occurred during withdrawal. Please try again.")
+    } catch (error) {
+      setWithdrawStatus("error");
+      setErrorMessage("An error occurred during withdrawal. Please try again.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
   
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -148,7 +185,9 @@ export default function WithdrawAmountPage() {
           <Card className="border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-purple-600/10 to-indigo-600/10 dark:from-purple-900/20 dark:to-indigo-900/20">
               <CardTitle>Withdraw Funds</CardTitle>
-              <CardDescription>You are eligible for a loan of up to ₹{eligibleAmount.toLocaleString()}</CardDescription>
+              <CardDescription>
+  You are eligible for a loan of up to ₹{eligibleAmount.toLocaleString("en-IN")}
+</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -196,7 +235,7 @@ export default function WithdrawAmountPage() {
                                 </FormControl>
                                 <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
                                   <span>₹10,000</span>
-                                  <span>₹{eligibleAmount.toLocaleString()}</span>
+                                  <span>₹{eligibleAmount.toLocaleString("en-IN")}</span>
                                 </div>
                                 <FormMessage />
                               </FormItem>
@@ -253,13 +292,13 @@ export default function WithdrawAmountPage() {
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
                               <span className="text-gray-600 dark:text-gray-400">Loan Amount:</span>
-                              <span className="font-medium">₹{form.watch("amount").toLocaleString()}</span>
+                              <span className="font-medium">₹{form.watch("amount").toLocaleString("en-IN")}</span>
                             </div>
 
                             <div className="flex justify-between text-sm">
                               <span className="text-gray-600 dark:text-gray-400">Processing Fee (2%):</span>
                               <span className="font-medium text-red-600 dark:text-red-400">
-                                - ₹{processingFee.toLocaleString()}
+                                - ₹{processingFee.toLocaleString("en-IN")}
                               </span>
                             </div>
 
@@ -278,7 +317,7 @@ export default function WithdrawAmountPage() {
 
                             <div className="flex justify-between text-sm">
                               <span className="text-gray-600 dark:text-gray-400">Monthly EMI:</span>
-                              <span className="font-medium">₹{emi.toLocaleString()}</span>
+                              <span className="font-medium">₹{emi.toLocaleString("en-IN")}</span>
                             </div>
 
                             <div className="border-t border-gray-200 dark:border-gray-700 my-2 pt-2"></div>
@@ -286,7 +325,7 @@ export default function WithdrawAmountPage() {
                             <div className="flex justify-between font-medium">
                               <span>Disbursed Amount:</span>
                               <span className="text-green-600 dark:text-green-400">
-                                ₹{totalAmount.toLocaleString()}
+                                ₹{totalAmount.toLocaleString("en-IN")}
                               </span>
                             </div>
                           </div>
@@ -380,13 +419,13 @@ export default function WithdrawAmountPage() {
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600 dark:text-gray-400">Loan Amount:</span>
-                            <span className="font-medium">₹{form.watch("amount").toLocaleString()}</span>
+                            <span className="font-medium">₹{form.watch("amount").toLocaleString("en-IN")}</span>
                           </div>
 
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600 dark:text-gray-400">Processing Fee (2%):</span>
                             <span className="font-medium text-red-600 dark:text-red-400">
-                              - ₹{processingFee.toLocaleString()}
+                              - ₹{processingFee.toLocaleString("en-IN")}
                             </span>
                           </div>
 
@@ -394,7 +433,7 @@ export default function WithdrawAmountPage() {
 
                           <div className="flex justify-between font-medium">
                             <span>Amount to be Disbursed:</span>
-                            <span className="text-green-600 dark:text-green-400">₹{totalAmount.toLocaleString()}</span>
+                            <span className="text-green-600 dark:text-green-400">₹{totalAmount.toLocaleString("en-IN")}</span>
                           </div>
                         </div>
                       </div>
