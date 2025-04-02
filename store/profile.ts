@@ -1,5 +1,5 @@
 import { IResponse } from "@/interface/ICommonStore";
-import { IBankReq, IPanReq, IProfileReq, IProfileState, IVerBankReq } from "@/interface/IProfileStore";
+import { IBankReq, IProfileState, IVerBankReq } from "@/interface/IProfileStore";
 import http from "@/utils/http";
 import { create } from "zustand";
 import { persist } from "zustand/middleware"
@@ -41,6 +41,13 @@ export const useProfileStore = create<IProfileState>()(
                         'Content-Type': 'multipart/form-data'
                     }
                 })
+                return response
+            },
+            getProfileAction : async () => {
+                const response: IResponse<any> = await http.get('/api/profile')
+                if(response?.status == 200 && response?.data) {
+                    set({ profileState : response.data })
+                }
                 return response
             }
         }),

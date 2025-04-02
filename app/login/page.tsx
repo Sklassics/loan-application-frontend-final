@@ -129,12 +129,14 @@ export default function LoginPage() {
           setAuthStep("email")
         }else if(!response?.isPersonalDetailsVerified){
           router.push("/onboarding")
+        }else if(!response?.isSelfieVerified){
+          router.push("/verify-selfie")
         }else if(!response?.isPancardVerified){
           router.push("/kyc-verification")
         }else if(!response?.isCreditLimit){
           router.push("/eligibility-check")
         }else if(!response?.isBankDetails){
-          router.push("/onboarding")
+          router.push("/bank-verification")
         }else if(!response?.isWithDrawAmount){
           router.push("/withdraw-amount")
         }else{

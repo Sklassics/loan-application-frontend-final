@@ -8,6 +8,7 @@ export interface IProfileState {
     sendBankDetailsAction : (payload : IBankReq) =>  Promise<IResponse<any>>
     verifyBankDetailsAction : (payload : IVerBankReq) => Promise<IResponse<any>>
     uploadProfileImageAction : (payload : any) => Promise<IResponse<any>>
+    getProfileAction : () => Promise<IResponse<any>>
 }
 
 export interface IProfileReq{

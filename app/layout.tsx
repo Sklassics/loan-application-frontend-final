@@ -3,8 +3,9 @@ import './globals.css'
 import { ToastContainer } from 'react-toastify';
 
 export const metadata: Metadata = {
-  title: 'Loan-App',
+  title: 'LoanApplication',
   description: 'Offers loans at the best rates',
+  icons:'/logo.png'
 }
 
 export default function RootLayout({
