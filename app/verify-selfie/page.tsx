@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import axios from "axios"
-import { useRouter } from "next/navigation"
+import { useRouter } from "next/router"
 
 export default function SelfieVerificationPage() {
   const [captureMode, setCaptureMode] = useState<"camera" | "upload" | null>(null)
@@ -87,13 +87,118 @@ export default function SelfieVerificationPage() {
     }
   }
 
+  // const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0]
+
+  //   if (!file) return
+
+  //   // Check file type
+  //   if (!file.type.match(/^image\/(jpeg|png|jpg)$/)) {
+  //     toast({
+  //       title: "Invalid File Type",
+  //       description: "Please upload a JPG or PNG image.",
+  //       variant: "destructive",
+  //     })
+  //     return
+  //   }
+
+  //   // Check file size (max 5MB)
+  //   if (file.size > 5 * 1024 * 1024) {
+  //     toast({
+  //       title: "File Too Large",
+  //       description: "Please upload an image smaller than 5MB.",
+  //       variant: "destructive",
+  //     })
+  //     return
+  //   }
+
+  //   const reader = new FileReader()
+  //   reader.onload = (e) => {
+  //     setSelfieImage(e.target?.result as string)
+  //   }
+  //   reader.readAsDataURL(file)
+  // }
+
+  // const resetSelfie = () => {
+  //   setSelfieImage(null)
+  //   if (captureMode === "camera") {
+  //     startCamera()
+  //   }
+  // }
+
+  // const handleSubmit = async () => {
+  //   if (!selfieImage) return
+
+  //   setIsSubmitting(true)
+
+  //   try {
+  //     // Convert base64 to blob
+  //     const response = await fetch(selfieImage)
+  //     const blob = await response.blob()
+
+  //     // Create form data
+  //     const formData = new FormData()
+  //     formData.append("selfie_image", blob, "selfie.jpg")
+
+  //     // Get JWT token from localStorage
+  //     const token = localStorage.getItem("auth_token")
+
+  //     if (!token) {
+  //       throw new Error("Authentication token not found")
+  //     }
+
+  //     // Send to API
+  //     const apiResponse : any = await axios.post(
+  //       process.env.NEXT_PUBLIC_BASE_URL + "/selfie/upload", 
+  //       formData,
+  //       {
+  //           headers : {
+  //               Authorization: `Bearer ${token}`,
+  //               "Content-Type": "multipart/form-data",
+  //           }
+  //       }
+  //   )
+
+  //     if (apiResponse.status == 200) {
+  //       // Show success state
+  //       setIsSuccess(true)
+  //       toast({
+  //           title: "Verification Successful",
+  //           description: "Your selfie has been uploaded successfully.",
+  //           variant: "default",
+  //       })
+
+  //       // Reset after 3 seconds
+  //       setTimeout(() => {
+  //           setIsSuccess(false)
+  //           setSelfieImage(null)
+  //           setCaptureMode(null)
+  //           router.push("/kyc-verification")
+  //       }, 3000)
+  //    }else{
+  //       toast({
+  //           title: "Submission Failed",
+  //           description: "Failed to upload selfie. Please try again.",
+  //           variant: "destructive",
+  //         })
+  //    }
+  //   } catch (error) {
+  //     console.error("Error submitting selfie:", error)
+  //     toast({
+  //       title: "Submission Failed",
+  //       description: error instanceof Error ? error.message : "Failed to upload selfie. Please try again.",
+  //       variant: "destructive",
+  //     })
+  //   } finally {
+  //     setIsSubmitting(false)
+  //   }
+  // }
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-
     if (!file) return
 
-    // Check file type
-    if (!file.type.match(/^image\/(jpeg|png|jpg)$/)) {
+    // Validate file type
+    if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
       toast({
         title: "Invalid File Type",
         description: "Please upload a JPG or PNG image.",
@@ -102,7 +207,7 @@ export default function SelfieVerificationPage() {
       return
     }
 
-    // Check file size (max 5MB)
+    // Validate file size (Max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "File Too Large",
@@ -112,18 +217,16 @@ export default function SelfieVerificationPage() {
       return
     }
 
+    // Convert file to Base64
     const reader = new FileReader()
-    reader.onload = (e) => {
-      setSelfieImage(e.target?.result as string)
+    reader.onload = (event) => {
+      setSelfieImage(event.target?.result as string)
     }
     reader.readAsDataURL(file)
   }
 
   const resetSelfie = () => {
     setSelfieImage(null)
-    if (captureMode === "camera") {
-      startCamera()
-    }
   }
 
   const handleSubmit = async () => {
@@ -132,61 +235,58 @@ export default function SelfieVerificationPage() {
     setIsSubmitting(true)
 
     try {
-      // Convert base64 to blob
-      const response = await fetch(selfieImage)
-      const blob = await response.blob()
+      // Convert base64 to Blob
+      const byteCharacters = atob(selfieImage.split(",")[1])
+      const byteNumbers = new Array(byteCharacters.length)
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i)
+      }
+      const byteArray = new Uint8Array(byteNumbers)
+      const blob = new Blob([byteArray], { type: "image/jpeg" })
 
-      // Create form data
+      // Create FormData
       const formData = new FormData()
       formData.append("selfie_image", blob, "selfie.jpg")
 
-      // Get JWT token from localStorage
+      // Get JWT token
       const token = localStorage.getItem("auth_token")
-
       if (!token) {
         throw new Error("Authentication token not found")
       }
 
       // Send to API
-      const apiResponse : any = await axios.post(
-        process.env.NEXT_PUBLIC_BASE_URL + "/selfie/upload", 
+      const apiResponse = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/selfie/upload`,
         formData,
         {
-            headers : {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "multipart/form-data",
-            }
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
-    )
+      )
 
-      if (apiResponse.status == 200) {
-        // Show success state
-        setIsSuccess(true)
+      // Handle Response
+      if (apiResponse.status === 200) {
         toast({
-            title: "Verification Successful",
-            description: "Your selfie has been uploaded successfully.",
-            variant: "default",
+          title: "Verification Successful",
+          description: "Your selfie has been uploaded successfully.",
+          variant: "default",
         })
 
-        // Reset after 3 seconds
         setTimeout(() => {
-            setIsSuccess(false)
-            setSelfieImage(null)
-            setCaptureMode(null)
-            router.push("/kyc-verification")
+          setSelfieImage(null)
+          router.push("/kyc-verification")
         }, 3000)
-     }else{
-        toast({
-            title: "Submission Failed",
-            description: "Failed to upload selfie. Please try again.",
-            variant: "destructive",
-          })
-     }
+      } else {
+        throw new Error("Failed to upload selfie")
+      }
     } catch (error) {
-      console.error("Error submitting selfie:", error)
+      console.error("Upload Error:", error)
       toast({
         title: "Submission Failed",
-        description: error instanceof Error ? error.message : "Failed to upload selfie. Please try again.",
+        description:
+          error instanceof Error ? error.message : "Failed to upload selfie. Please try again.",
         variant: "destructive",
       })
     } finally {

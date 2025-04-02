@@ -263,6 +263,7 @@ export default function LoginPage() {
                     <Smartphone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                     <Input
                       id="phone"
+                      maxLength={10}
                       type="tel"
                       placeholder="Enter your phone number"
                       value={phoneNumber}

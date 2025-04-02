@@ -1,4 +1,5 @@
 export interface IResponse<T> {
+    creditLimit: undefined;
     status: number;
     data?: T;
     token?: string,

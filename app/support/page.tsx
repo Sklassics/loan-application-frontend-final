@@ -139,9 +139,15 @@ export default function SupportPage() {
             </CardContent>
           </Card>
 
-                    <h1 className="text-xl">Exapmle Mail :</h1 >
-          <Image src="/assets/example-mail.png" alt="Example of writing an email" width={900} height={600} className="rounded-md mx-auto" />
-      
+        <h1 className="text-xl">Exapmle Mail :</h1 >
+          <Image 
+            src="/assets/example-mail.png" 
+            alt="Example of writing an email" 
+            width={900} 
+            height={600} 
+            className="rounded-md mx-auto" 
+            priority 
+          />      
         </TabsContent>
     
         <TabsContent value="ticket" className="space-y-4">

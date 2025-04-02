@@ -11,53 +11,58 @@ import { Loader2, AlertCircle, CheckCircle, IndianRupee, Clock, ArrowRight } fro
 import { useCreditStore } from "@/store/credit"
 
 export default function EligibilityCheckPage() {
-  const router = useRouter()
-  const [isChecking, setIsChecking] = useState(false)
-  const [checkingProgress, setCheckingProgress] = useState(0)
-  const [checkStatus, setCheckStatus] = useState<"idle" | "checking" | "success" | "error">("idle")
-  const [eligibleAmount, setEligibleAmount] = useState(0)
-  const [errorReason, setErrorReason] = useState("")
-  const getCreditLimit = useCreditStore((state) => state.getCreditLimitAction)
-
+  const router = useRouter();
+  const [isChecking, setIsChecking] = useState(false);
+  const [checkingProgress, setCheckingProgress] = useState(0);
+  const [checkStatus, setCheckStatus] = useState<"idle" | "checking" | "success" | "error">("idle");
+  const [eligibleAmount, setEligibleAmount] = useState(0);
+  const [errorReason, setErrorReason] = useState("");
+  const getCreditLimit = useCreditStore((state) => state.getCreditLimitAction);
+  
   const checkEligibility = async () => {
-    setIsChecking(true)
-    setCheckStatus("checking")
-    setCheckingProgress(0)
-
+    setIsChecking(true);
+    setCheckStatus("checking");
+    setCheckingProgress(0);
+  
     // Simulate progress updates
     const progressInterval = setInterval(() => {
       setCheckingProgress((prev) => {
-        if (prev <= 100) {
-          clearInterval(progressInterval)
-          return 100
+        if (prev >= 95) { // Stop incrementing near 100 to allow the final update in `finally`
+          return prev;
         }
-        return prev + 5
-      })
-    }, 150)
-
+        return prev + 5;
+      });
+    }, 150);
+  
     try {
-      const response = await getCreditLimit()
-      if (response?.status === 200 && response?.data?.creditLimit) {
-        const amount = response?.data?.creditLimit
-        setEligibleAmount(amount)
-        setCheckStatus("success")
-      } else if(response?.message){
-        setErrorReason(response.message ||"Your credit score is below our threshold. Please try again after 6 months.")
-        setCheckStatus("error")
+      const response = await getCreditLimit();
+  
+      if (response?.status === 200) {
+        if (response?.creditLimit !== undefined) {  // ✅ Fixed: Access creditLimit correctly
+          setEligibleAmount(response.creditLimit);
+          setCheckStatus("success");
+        } else {
+          setErrorReason("Your credit score is below our threshold. Please try again after 6 months.");
+          setCheckStatus("error");
+        }
+      } else {
+        setErrorReason(response?.message || "An unexpected error occurred.");
+        setCheckStatus("error");
       }
     } catch (error) {
-      setCheckStatus("error")
-      setErrorReason("An error occurred while checking eligibility. Please try again.")
+      setCheckStatus("error");
+      setErrorReason("An error occurred while checking eligibility. Please try again.");
     } finally {
-      clearInterval(progressInterval)
-      setCheckingProgress(100)
-      setIsChecking(false)
+      clearInterval(progressInterval);
+      setCheckingProgress(100);
+      setIsChecking(false);
     }
-  }
-
+  };
+  
   const handleContinue = () => {
-    router.push("/withdraw-amount")
-  }
+    router.push("/withdraw-amount");
+  };
+  
 
   const containerVariants = {
     hidden: { opacity: 0 },

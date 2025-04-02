@@ -49,8 +49,8 @@ const createFormSchema = (employmentType: string) => {
     return z.object({
       employmentType: z.string(),
       instituteName: z.string().min(2, "Institute name is required"),
-      studentId: z.string().min(2, "Student ID is required"),
-      campusAddress: z.string().min(5, "Campus address is required"),
+      collegeId: z.string().min(2, "Student ID is required"),
+      collegeAddress: z.string().min(5, "Campus address is required"),
       annualIncome: z.string().min(2, "Annual income is required"),
     });
   }
@@ -124,8 +124,8 @@ export default function EmploymentForm({
       form.reset({
         employmentType,
         instituteName: form.getValues("instituteName") || "",
-        studentId: form.getValues("studentId") || "",
-        campusAddress: form.getValues("campusAddress") || "",
+        collegeId: form.getValues("collegeId") || "",
+        collegeAddress: form.getValues("collegeAddress") || "",
         annual_income: form.getValues("annual_income") || "",
       });
     }
@@ -357,7 +357,7 @@ export default function EmploymentForm({
                   <motion.div variants={itemVariants}>
                     <FormField
                       control={form.control}
-                      name="studentId"
+                      name="collegeId"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Student ID</FormLabel>
@@ -397,7 +397,7 @@ export default function EmploymentForm({
                   <motion.div variants={itemVariants}>
                     <FormField
                       control={form.control}
-                      name="campusAddress"
+                      name="collegeAddress"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Campus Address</FormLabel>

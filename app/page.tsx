@@ -233,14 +233,15 @@ export default function Home() {
                     style={{ perspective: "1000px", transformStyle: "preserve-3d" }}
                   >
                     <div className="relative w-full h-full">
-                      <Image
-                        src="/assets/note.gif"
-                        alt="Hero Image"
-                        width={550}
-                        height={550}
-                        className="rounded-2xl object-cover shadow-2xl"
-                        style={{ transform: "translateZ(20px)" }}
-                      />
+                         <Image
+                          src="/assets/note.gif"
+                          alt="Hero Image"
+                          width={550}
+                          height={550}
+                          className="rounded-2xl object-cover shadow-2xl"
+                          style={{ transform: "translateZ(20px)" }}
+                          unoptimized 
+                        />
                       <motion.div 
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
@@ -570,13 +571,14 @@ export default function Home() {
                 <div className="relative">
                   <div className="absolute -top-6 -left-6 w-24 h-24 bg-violet-300/30 rounded-full"></div>
                   <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-indigo-300/30 rounded-full"></div>
-                  <Image
-                    src="/assets/credit.png"
-                    alt="About Us"
-                    width={600}
-                    height={400}
-                    className="rounded-2xl object-cover shadow-xl relative z-10"
-                  />
+                      <Image
+                        src="/assets/credit.png"
+                        alt="About Us"
+                        width={600}
+                        height={400}
+                        className="rounded-2xl object-cover shadow-xl relative z-10"
+                        priority 
+                      />
                 
                 </div>
                 

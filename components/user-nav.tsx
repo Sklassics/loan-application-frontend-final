@@ -22,10 +22,13 @@ export function UserNav() {
   const [isOpen, setIsOpen] = useState(false)
   const logout = useAuthStore((state) => state.logoutAction)
 
-  const handleLogout = () => {
-    logout();
-    router.push("/login")
-  }
+  const handleLogout = async () => {
+    console.log("Logging out...");
+    await logout();
+    console.log("Redirecting...");
+    router.push("/login");
+  };
+  
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
