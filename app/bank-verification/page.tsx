@@ -315,6 +315,7 @@ export default function BankVerificationPage() {
                                     placeholder="Enter 10-digit mobile number"
                                     {...field}
                                     className="pl-10 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
+                                    maxLength={10}
                                   />
                                 </div>
                               </FormControl>
