@@ -31,7 +31,7 @@ import { IVerBankReq } from "@/interface/IProfileStore"
 // Bank form schema
 const bankFormSchema = z.object({
   fullName: z.string().min(3, {
-    message: "Full name must be at least 3 characters",
+    message: "Full name must be at least 4 characters",
   }),
   bankName: z.string().min(2, {
     message: "Bank name is required",
