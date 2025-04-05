@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import axios from "axios"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
 
 export default function SelfieVerificationPage() {
   const [captureMode, setCaptureMode] = useState<"camera" | "upload" | null>(null)
