@@ -60,7 +60,7 @@ export default function EligibilityCheckPage() {
   };
   
   const handleContinue = () => {
-    router.push("/withdraw-amount");
+    router.push("/bank-verification");
   };
   
 
@@ -121,7 +121,7 @@ export default function EligibilityCheckPage() {
                     </p>
                     <Button
                       onClick={checkEligibility}
-                      className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 px-8"
+                      className="bg-violet-150 px-8"
                     >
                       Check Eligibility
                     </Button>
@@ -188,10 +188,9 @@ export default function EligibilityCheckPage() {
                     <div className="bg-red-50 dark:bg-red-900/20 rounded-full p-6 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
                       <AlertCircle className="h-12 w-12 text-red-600 dark:text-red-400" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">Not Eligible</h3>
                     <Alert variant="destructive" className="mb-6 max-w-md mx-auto">
                       <AlertCircle className="h-4 w-4" />
-                      <AlertTitle>Eligibility Check Failed</AlertTitle>
+                      <AlertTitle>Eligibility Check</AlertTitle>
                       <AlertDescription>{errorReason}</AlertDescription>
                     </Alert>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -207,7 +206,7 @@ export default function EligibilityCheckPage() {
                           setCheckStatus("idle")
                           setErrorReason("")
                         }}
-                        className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                        className="bg-violet-150 "
                       >
                         Try Again
                       </Button>

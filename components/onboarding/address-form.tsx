@@ -33,6 +33,7 @@ const formSchema = z.object({
       message: "Phone number must be 10 digits.",
     })
     .optional(),
+    
 })
 
 type AddressFormProps = {
@@ -98,10 +99,16 @@ export default function AddressForm({ onSubmit, onBack, initialData }: AddressFo
     }
   }
 
+  // function handleSubmit(values: z.infer<typeof formSchema>) {
+  //   onSubmit(values)
+  // }
   function handleSubmit(values: z.infer<typeof formSchema>) {
-    onSubmit(values)
+    const updatedValues = {
+      ...values,
+      alternatePhone: values.alternatePhone ? `+91${values.alternatePhone}` : undefined,
+    }
+    onSubmit(updatedValues)
   }
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">

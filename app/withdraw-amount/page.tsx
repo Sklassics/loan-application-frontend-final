@@ -49,7 +49,13 @@ export default function WithdrawAmountPage() {
 
   // For demo purposes, we'll set a random eligible amount
   const eligibleAmount = 500000
-
+  const [loanRange, setLoanRange] = useState({
+    minAmount: 10000,
+    maxAmount: 100000,
+    minTenure: 3,
+    maxTenure: 60
+  });
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -61,8 +67,81 @@ export default function WithdrawAmountPage() {
       documentationFee: undefined, 
     },
   });
+  useEffect(() => {
+    const fetchLoanConfig = async () => {
+      try {
+        const token = localStorage.getItem("auth_token");
+        if (!token) return;
   
-
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/credit-limit`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (!response.ok) {
+          console.error("Failed to fetch loan config");
+          return;
+        }
+  
+        const data = await response.json();
+  
+        if (data.success && data.creditLimit) {
+          const creditLimit = Math.floor(Number(data.creditLimit));
+  
+          // Calculate tenure based on ₹2000 per month
+          const calculatedTenure = Math.ceil(creditLimit / 2000);
+  
+          // Optional: clamp tenure within min/max range if needed
+          const minTenure = 1;
+          const maxTenure = 60;
+          const clampedTenure = Math.max(minTenure, Math.min(calculatedTenure, maxTenure));
+  
+          // Set the form values
+          form.setValue("amount", creditLimit);
+          form.setValue("tenure", clampedTenure);
+        }
+      } catch (err) {
+        console.error("Error fetching loan config:", err);
+      }
+    };
+  
+    fetchLoanConfig();
+  }, []);
+  
+  useEffect(() => {
+    const fetchBankDetails = async () => {
+      try {
+        const token = localStorage.getItem("auth_token");
+        if (!token) return;
+  
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/bank-details/get`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (!response.ok) {
+          console.error("Failed to fetch bank details");
+          return;
+        }
+  
+        const data = await response.json();
+  
+        if (data.success && data["Bank Details"]) {
+          const bankData = data["Bank Details"];
+          form.setValue("accountNumber", bankData.accountNumber || "");
+          form.setValue("ifscCode", bankData.ifscCode || ""); // Assuming this key might exist in the real API
+          form.setValue("accountHolderName", bankData.fullName || "");
+        }
+      } catch (error) {
+        console.error("Error fetching bank details:", error);
+      }
+    };
+  
+    fetchBankDetails();
+  }, []);
+  
   // Calculate processing fee (2% of loan amount)
   const amount = useWatch({ control: form.control, name: "amount" });
 
@@ -100,72 +179,82 @@ export default function WithdrawAmountPage() {
   }, [amount, tenure, interestRate]);
 
   const onSubmit: SubmitHandler<{ 
-  amount: number; 
-  tenure: number; 
-  processingFee?: number; 
-  onboardingFee?: number; 
-  documentationFee?: number; 
-}> = async (values) => {
-  setIsSubmitting(true);
-  setWithdrawStatus("idle");
-  setErrorMessage("");
-
-  try {
-    const token = localStorage.getItem("auth_token");
-
-    if (!token || token.trim() === "") {
-      setWithdrawStatus("error");
-      setErrorMessage("Authentication token is missing. Please log in.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    const requestBody = {
-      withdrawAmount: values.amount,
-      tenure: `${values.tenure} months`,
-      processingFee: values.processingFee ?? 0,
-      onboardingFee: values.onboardingFee ?? 0,
-      documentationFee: values.documentationFee ?? 0,
-    };
-    console.log("Request Body:", requestBody);
-    console.log("Token sending for backend", token);
-    
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/withdraw`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify(requestBody),
-    });
-    
-    const data = await response.json();
-    console.log("Response Data:", data);
-
-    if (response.status === 401) {
-      setWithdrawStatus("error");
-      setErrorMessage("Session expired. Please log in again.");
-      localStorage.removeItem("token");
-      router.push("/login");
-    } else if (response.ok) {
-      setWithdrawStatus("success");
-      setTimeout(() => {
-        router.push(`/transaction-processing?amount=${values.amount}`);
-      }, 1500);
-    } else {
-      setWithdrawStatus("error");
-      setErrorMessage(data.message || "Withdrawal failed. Please try again.");
-    }
-  } catch (error) {
-    setWithdrawStatus("error");
-    setErrorMessage("An error occurred during withdrawal. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
+    amount: number; 
+    tenure: number; 
+    processingFee?: number; 
+    onboardingFee?: number; 
+    documentationFee?: number; 
+  }> = async (values) => {
+    setIsSubmitting(true);
+    setWithdrawStatus("idle");
+    setErrorMessage("");  // Clear any existing error message
   
-
+    try {
+      // Step 1: Retrieve the authentication token
+      const token = localStorage.getItem("auth_token");
+  
+      // Step 2: Check if token is available, if not return error
+      if (!token || token.trim() === "") {
+        setWithdrawStatus("error");
+        setErrorMessage("Authentication token is missing. Please log in.");
+        setIsSubmitting(false); // Ensure submitting state is cleared
+        return;
+      }
+  
+      // Step 3: Prepare the request body to send to the API
+      const requestBody = {
+        withdrawAmount: values.amount,
+        tenure: `${values.tenure} months`,
+        processingFee: values.processingFee ?? 0,
+        onboardingFee: values.onboardingFee ?? 0,
+        documentationFee: values.documentationFee ?? 0,
+      };
+  
+      console.log("Request Body:", requestBody); // Debugging the request body
+      console.log("Token sent for backend:", token); // Debugging the token
+  
+      // Step 4: Make the API request using fetch
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/withdraw`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+  
+      // Step 5: Parse the response from the backend
+      const data = await response.json();
+      console.log("Response Data:", data); // Debugging the response
+  
+      // Step 6: Handle different response statuses
+      if (response.status === 401) {
+        // 401: Unauthorized, handle session expiry
+        setWithdrawStatus("error");
+        setErrorMessage("Session expired. Please log in again.");
+        localStorage.removeItem("auth_token"); // Clear invalid token
+        router.push("/login"); // Redirect to login page
+      } else if (response.ok) {
+        // Successful withdrawal
+        setWithdrawStatus("success");
+        setTimeout(() => {
+          router.push(`/agreement?amount=${values.amount}`); // Redirect to processing page
+        }, 1500);
+      } else {
+        // General error response from API
+        setWithdrawStatus("error");
+        setErrorMessage(data.message || "Withdrawal failed. Please try again.");
+      }
+    } catch (error) {
+      // Handle any errors that occur during the API call
+      console.error("Error occurred during withdrawal:", error);
+      setWithdrawStatus("error");
+      setErrorMessage("An error occurred during withdrawal. Please try again.");
+    } finally {
+      setIsSubmitting(false); // Ensure the form is not stuck in submitting state
+    }
+  };
+  
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -225,12 +314,17 @@ export default function WithdrawAmountPage() {
                             <div className="relative">
                               <IndianRupee className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
                               <Input
-                                id="amount-input"
-                                type="number"
-                                value={form.watch("amount")}
-                                onChange={(e) => form.setValue("amount", Number.parseInt(e.target.value))}
-                                className="pl-8 w-32 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
-                              />
+  id="amount-input"
+  type="number"
+  min={loanRange.minAmount}
+  max={loanRange.maxAmount}
+  value={form.watch("amount") ?? loanRange.maxAmount}
+  onChange={(e) => {
+    const val = Number.parseInt(e.target.value);
+    form.setValue("amount", val);
+  }}
+  className="pl-8 w-32 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
+/>
                             </div>
                           </div>
                           <FormField
@@ -239,20 +333,18 @@ export default function WithdrawAmountPage() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
-                                  <Slider
-                                    defaultValue={[field.value]}
-                                    min={10000}
-                                    max={eligibleAmount}
-                                    step={5000}
-                                    onValueChange={(value) => {
-                                      field.onChange(value[0])
-                                    }}
-                                    className="mt-2"
-                                  />
+                                <Slider
+  defaultValue={[field.value]}
+  min={loanRange.minAmount}
+  max={loanRange.maxAmount}
+  step={5000}
+  onValueChange={(value) => field.onChange(value[0])}
+  className="mt-2"
+/>
                                 </FormControl>
                                 <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                  <span>₹10,000</span>
-                                  <span>₹{eligibleAmount.toLocaleString("en-IN")}</span>
+                                  {/* <span>₹10,000</span> */}
+                                  {/* <span>₹{eligibleAmount.toLocaleString("en-IN")}</span> */}
                                 </div>
                                 <FormMessage />
                               </FormItem>
@@ -268,12 +360,18 @@ export default function WithdrawAmountPage() {
                             <div className="relative">
                               <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
                               <Input
-                                id="tenure-input"
-                                type="number"
-                                value={form.watch("tenure")}
-                                onChange={(e) => form.setValue("tenure", Number.parseInt(e.target.value))}
-                                className="pl-8 w-20 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
-                              />
+  id="tenure-input"
+  type="number"
+  min={loanRange.minTenure}
+  max={loanRange.maxTenure}
+  value={form.watch("tenure") ?? loanRange.minTenure}
+  onChange={(e) => {
+    const val = Number.parseInt(e.target.value);
+    form.setValue("tenure", val);
+  }}
+  className="pl-8 w-20 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
+/>
+
                             </div>
                           </div>
                           <FormField
@@ -294,8 +392,8 @@ export default function WithdrawAmountPage() {
                                   />
                                 </FormControl>
                                 <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                  <span>3 months</span>
-                                  <span>60 months</span>
+                                  {/* <span>3 months</span>
+                                  <span>60 months</span> */}
                                 </div>
                                 <FormMessage />
                               </FormItem>
@@ -416,7 +514,7 @@ export default function WithdrawAmountPage() {
                               <FormMessage />
                             </FormItem>
                           )}
-                        />
+                        /> 
 
                         <div className="flex items-end">
                           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 w-full">

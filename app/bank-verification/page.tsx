@@ -98,19 +98,21 @@ export default function BankVerificationPage() {
       otp: "",
     },
   })
+  const [bankFormData, setBankFormData] = useState<z.infer<typeof bankFormSchema> | null>(null)
 
   const onBankSubmit = async (values: z.infer<typeof bankFormSchema>) => {
     setIsSubmitting(true)
     setVerificationStatus("idle")
-
+  
     try {
-      // Call bank verification API
-      console.log(values, "values")
+      // Store the full form data locally
+      setBankFormData(values)
+  
+      // Send only mobileNumber to backend
       const verificationResult = await sendOtp(values)
-
+  
       if (verificationResult.success) {
         setVerificationStatus("success")
-        // Move to OTP verification step
         setTimeout(() => {
           setCurrentStep("otp-verification")
           setVerificationStatus("idle")
@@ -129,24 +131,29 @@ export default function BankVerificationPage() {
       setIsSubmitting(false)
     }
   }
-
+  
   const onOtpSubmit = async (values: z.infer<typeof otpFormSchema>) => {
+    if (!bankFormData) {
+      setErrorMessage("Missing bank details. Please restart verification.")
+      return
+    }
+  
     setIsSubmitting(true)
     setVerificationStatus("idle")
-
+  
     try {
-      // Call OTP verification API
-      let req : IVerBankReq = {
-        mobileNumber : bankForm.getValues().mobileNumber,
-        otp : values.otp
+      // Combine stored form data with OTP
+      const requestData: IVerBankReq = {
+        ...bankFormData,
+        otp: values.otp,
       }
-      const otpVerificationResult = await verifyBankOtp(req)
-
+  
+      const otpVerificationResult = await verifyBankOtp(requestData)
+  
       if (otpVerificationResult.success) {
         setVerificationStatus("success")
-        // Redirect to next step after 2 seconds
         setTimeout(() => {
-          router.push("/onboarding")
+          router.push("/withdraw-amount")
         }, 2000)
       } else {
         setVerificationStatus("error")
@@ -162,7 +169,7 @@ export default function BankVerificationPage() {
       setIsSubmitting(false)
     }
   }
-
+  
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -382,7 +389,7 @@ export default function BankVerificationPage() {
                         <Button
                           type="submit"
                           disabled={isSubmitting}
-                          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                          className="bg-violet-150"
                         >
                           {isSubmitting ? (
                             <>
@@ -493,7 +500,7 @@ export default function BankVerificationPage() {
                         <Button
                           type="submit"
                           disabled={isSubmitting}
-                          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                          className="bg-violet-150"
                         >
                           {isSubmitting ? (
                             <>
