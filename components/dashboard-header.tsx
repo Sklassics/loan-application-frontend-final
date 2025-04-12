@@ -16,7 +16,7 @@ export function DashboardHeader({ heading, text, children }: DashboardHeaderProp
         className="grid gap-1"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.6 }}
       >
         <h1 className="text-2xl font-bold tracking-tight md:text-3xl bg-clip-text text-transparent bg-gradient-to-r from-violet-700 to-indigo-700">
           {heading}
