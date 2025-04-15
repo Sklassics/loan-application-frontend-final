@@ -40,6 +40,7 @@ export interface IBankReq{
     address : string
     accountNumber : string
     mobileNumber : string
+    ifsc : string
 }
 
 export interface IVerBankReq{

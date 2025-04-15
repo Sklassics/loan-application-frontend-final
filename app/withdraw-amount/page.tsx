@@ -25,7 +25,7 @@ const formSchema = z.object({
     .string()
     .min(9, { message: "Account number must be at least 9 digits" })
     .max(18, { message: "Account number must be at most 18 digits" }),
-  ifscCode: z.string().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, { message: "Invalid IFSC code format" }),
+  ifsc: z.string().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, { message: "Invalid IFSC code format" }),
   accountHolderName: z.string().min(3, { message: "Account holder name must be at least 3 characters" }),
   tenure: z.coerce
     .number()
@@ -61,7 +61,7 @@ export default function WithdrawAmountPage() {
     defaultValues: {
       amount: undefined, 
       accountNumber: "",
-      ifscCode: "",
+      ifsc: "",
       accountHolderName: "",
       tenure: undefined,
       documentationFee: undefined, 
@@ -131,7 +131,7 @@ export default function WithdrawAmountPage() {
         if (data.success && data["Bank Details"]) {
           const bankData = data["Bank Details"];
           form.setValue("accountNumber", bankData.accountNumber || "");
-          form.setValue("ifscCode", bankData.ifscCode || ""); // Assuming this key might exist in the real API
+          form.setValue("ifsc", bankData.ifsc || "");
           form.setValue("accountHolderName", bankData.fullName || "");
         }
       } catch (error) {
@@ -500,7 +500,7 @@ export default function WithdrawAmountPage() {
 
                         <FormField
                           control={form.control}
-                          name="ifscCode"
+                          name="ifsc"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>IFSC Code</FormLabel>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -38,27 +38,69 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { motion } from "framer-motion"
 
 export default function ProfilePage() {
-  const [isEditing, setIsEditing] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [activeTab, setActiveTab] = useState("personal")
+  const [isEditing, setIsEditing] = useState(false);
+  const [dashboardData, setdashboardData] = useState<any>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState("personal");
 
-  const handleSaveProfile = () => {
-    setIsSaving(true)
-    // Simulate API call
-    setTimeout(() => {
-      setIsSaving(false)
-      setIsEditing(false)
-    }, 1500)
-  }
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoadingProfile(true);
+      try {
+        const token = localStorage.getItem("auth_token");
+        if (!token) throw new Error("Token not found");
 
-  const handleDeleteAccount = () => {
-    // Simulate API call
-    setTimeout(() => {
-      setShowDeleteDialog(false)
-      window.location.href = "/"
-    }, 1500)
-  }
+        const response = await fetch("http://147.93.110.43:8000/api/dashboard", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch profile");
+
+        const data = await response.json();
+        setdashboardData(data);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    // TODO: Call your PUT or PATCH API to update profile here
+    setIsSaving(false);
+    setIsEditing(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) throw new Error("Token not found");
+
+      const response = await fetch("http://147.93.110.43:8000/api/delete-account", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to delete account");
+
+      alert("Account deleted successfully.");
+      // Redirect or perform additional actions after account deletion
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      alert("Failed to delete account. Please try again.");
+    }
+  };
 
   const container = {
     hidden: { opacity: 0 },
@@ -69,11 +111,15 @@ export default function ProfilePage() {
         delayChildren: 0.2,
       },
     },
-  }
+  };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70 } },
+  };
+
+  if (loadingProfile) {
+    return <div className="p-6 text-center">Loading profile...</div>;
   }
 
   return (
@@ -93,26 +139,21 @@ export default function ProfilePage() {
             className="bg-violet-150 transition-all duration-300"
           >
             {isSaving ? (
-              <>
-                <svg
-                  className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Saving...
-              </>
+              <svg
+                className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
             ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" /> Save Changes
-              </>
+              <Save className="mr-2 h-4 w-4" /> 
             )}
           </Button>
         )}
@@ -168,8 +209,9 @@ export default function ProfilePage() {
                       )}
                     </div>
                     <div>
-                      <CardTitle className="text-slate-800">John Doe</CardTitle>
-                      <CardDescription className="text-slate-500">john.doe@example.com</CardDescription>
+                <CardTitle className="text-slate-800">{dashboardData?.dashboardData?.profile?.firstName} {dashboardData?.dashboardData?.profile?.lastName}</CardTitle>
+                <CardDescription className="text-slate-500">{dashboardData?.dashboardData?.profile?.email}</CardDescription>
+
                     </div>
                   </div>
                 </CardHeader>
@@ -180,9 +222,8 @@ export default function ProfilePage() {
                         First Name
                       </Label>
                       <Input
-                        id="first-name"
-                        defaultValue="John"
-                        disabled={!isEditing}
+                       defaultValue={dashboardData?.dashboardData?.profile?.firstName} 
+                       disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
                     </div>
@@ -191,8 +232,8 @@ export default function ProfilePage() {
                         Last Name
                       </Label>
                       <Input
-                        id="last-name"
-                        defaultValue="Doe"
+                          id="last-name"
+                           defaultValue={dashboardData?.dashboardData?.profile?.lastName} 
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
@@ -204,7 +245,7 @@ export default function ProfilePage() {
                       <Input
                         id="email"
                         type="email"
-                        defaultValue="john.doe@example.com"
+                        defaultValue={dashboardData?.dashboardData?.profile?.mobile?.email} 
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
@@ -216,7 +257,7 @@ export default function ProfilePage() {
                       <Input
                         id="phone"
                         type="tel"
-                        defaultValue="+91 9876543210"
+                        defaultValue={dashboardData?.dashboardData?.profile?.mobile?.mobileNo} 
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
@@ -228,7 +269,7 @@ export default function ProfilePage() {
                       <Input
                         id="dob"
                         type="date"
-                        defaultValue="1990-01-01"
+                        defaultValue={dashboardData?.dashboardData?.profile?.dateOfBirth}
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
@@ -239,9 +280,9 @@ export default function ProfilePage() {
                       </Label>
                       <select
                         id="gender"
+                        defaultValue={dashboardData?.dashboardData?.profile?.gender}
                         className="w-full rounded-md border border-slate-300 bg-background px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition-colors"
                         disabled={!isEditing}
-                        defaultValue="male"
                       >
                         <option value="male">Male</option>
                         <option value="female">Female</option>
@@ -259,13 +300,34 @@ export default function ProfilePage() {
                       id="address"
                       className="w-full rounded-md border border-slate-300 bg-background px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition-colors"
                       rows={3}
-                      defaultValue="123 Main Street, Apartment 4B, Mumbai, Maharashtra, 400001"
-                      disabled={!isEditing}
+                      defaultValue={dashboardData?.dashboardData?.profile?.address}               
+                             disabled={!isEditing}
                     ></textarea>
                   </div>
+                  
                 </CardContent>
               </Card>
+              
             </motion.div>
+            {/* <div className="space-y-4 mt-6">
+  <label className="text-slate-700">Verification Status</label>
+  <div className="space-y-2">
+    {Object.entries(profileData?.keys).map(([key, value]) => (
+      <div key={key} className="flex justify-between">
+        <span className="text-slate-700 capitalize">
+          {key.replace(/([A-Z])/g, " $1").toLowerCase()}
+        </span>
+        <span
+          className={`text-sm font-medium ${
+            value ? "text-green-500" : "text-red-500"
+          }`}
+        >
+          {value ? "Verified" : "Not Verified"}
+        </span>
+      </div>
+    ))}
+  </div>
+</div> */}
 
             <motion.div variants={item}>
               <Card className="border-slate-200 hover:shadow-md transition-shadow duration-300 overflow-hidden">
@@ -286,8 +348,8 @@ export default function ProfilePage() {
                         id="employment-type"
                         className="w-full rounded-md border border-slate-300 bg-background px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition-colors"
                         disabled={!isEditing}
-                        defaultValue="salaried"
-                      >
+                        defaultValue={dashboardData?.dashboardData?.profile?.employmentType || "salaried"}
+                        >
                         <option value="salaried">Salaried</option>
                         <option value="self-employed">Self-Employed</option>
                         <option value="business">Business Owner</option>
@@ -300,7 +362,7 @@ export default function ProfilePage() {
                       </Label>
                       <Input
                         id="company-name"
-                        defaultValue="Acme Corporation"
+                        defaultValue={dashboardData?.dashboardData?.profile?.companyName || ""}
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
@@ -311,7 +373,7 @@ export default function ProfilePage() {
                       </Label>
                       <Input
                         id="designation"
-                        defaultValue="Senior Software Engineer"
+                        defaultValue={dashboardData?.dashboardData?.profile?.designation || ""}
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
@@ -323,8 +385,11 @@ export default function ProfilePage() {
                       <Input
                         id="monthly-income"
                         type="number"
-                        defaultValue="50000"
-                        disabled={!isEditing}
+                        defaultValue={
+                          dashboardData?.dashboardData?.profile?.annualIncome
+                            ? Number(dashboardData.dashboardData.profile.annualIncome) / 12
+                            : ""
+                        }                      disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
                     </div>
@@ -335,7 +400,7 @@ export default function ProfilePage() {
                       <Input
                         id="work-experience"
                         type="number"
-                        defaultValue="5"
+                        defaultValue={dashboardData?.dashboardData?.profile?.workExperience || ""}
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
@@ -362,7 +427,7 @@ export default function ProfilePage() {
                       </Label>
                       <Input
                         id="account-holder"
-                        defaultValue="John Doe"
+                        defaultValue={dashboardData?.dashboardData?.profile?.bankDetails?.fullName || ""}
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
@@ -373,7 +438,7 @@ export default function ProfilePage() {
                       </Label>
                       <Input
                         id="account-number"
-                        defaultValue="XXXX XXXX XXXX 1234"
+                        defaultValue={dashboardData?.dashboardData?.profile?.bankDetails?.accountNumber || ""}
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
@@ -384,7 +449,7 @@ export default function ProfilePage() {
                       </Label>
                       <Input
                         id="bank-name"
-                        defaultValue="State Bank of India"
+                        defaultValue={dashboardData?.dashboardData?.profile?.bankDetails?.bankName || ""}
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
@@ -395,7 +460,7 @@ export default function ProfilePage() {
                       </Label>
                       <Input
                         id="ifsc-code"
-                        defaultValue="SBIN0001234"
+                        defaultValue={dashboardData?.dashboardData?.profile?.bankDetails?.ifsc || ""}
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />

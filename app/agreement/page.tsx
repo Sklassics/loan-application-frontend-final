@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import html2pdf from "html2pdf.js";
+import SignaturePad from 'react-signature-canvas'
 
 export default function AgreementPage() {
   const [agreementData, setAgreementData] = useState<any>(null);
@@ -89,6 +90,23 @@ export default function AgreementPage() {
       alert("Failed to submit agreement: " + (err.response?.data?.message || err.message));
     }
   };
+  const sigCanvasRef = useRef<any>(null)
+  const [signatureURL, setSignatureURL] = useState<string | null>(null)
+
+  const clearSignature = () => {
+    sigCanvasRef.current.clear()
+    setSignatureURL(null)
+  }
+
+  const saveSignature = () => {
+    if (!sigCanvasRef.current.isEmpty()) {
+      const dataURL = sigCanvasRef.current.getTrimmedCanvas().toDataURL('image/png')
+      setSignatureURL(dataURL)
+      // You can now use this dataURL to send to your backend or include in PDF
+      console.log('Saved Signature:', dataURL)
+    }
+  }
+
 
   if (loading) return <div className="text-center mt-10">Loading...</div>;
   if (error) return <div className="text-red-500 text-center mt-10">{error}</div>;
@@ -152,7 +170,8 @@ export default function AgreementPage() {
           </>
         )}
       </div>
-      <div className="mt-8">
+      
+      <div  ref={pdfRef} className="mt-8">
       <div className="text-black font-sans text-sm">
     <div className="max-w-full mx-auto p-6 bg-white shadow-md rounded-lg">
       <h1 className="text-2xl font-bold mb-4">Terms & Conditions</h1>
@@ -372,6 +391,7 @@ as indicated in below table:</p>
     </div>
   </div>
       </div>
+      
       <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
         <button
           onClick={handleDownload}
@@ -387,14 +407,44 @@ as indicated in below table:</p>
         </button>
       </div>
 
-      {submitted && (
-        <div className="text-green-600 text-center font-medium mt-4 text-sm">
-          ✅ Money will be credited to your account within 24 hours!
+
+<h2 className="text-lg font-semibold mb-2">Draw Your Signature Below</h2>
+      <div className="border border-gray-300 rounded-md overflow-hidden bg-gray-100 mb-4">
+        <SignaturePad
+          ref={sigCanvasRef}
+          canvasProps={{
+            width: 500,
+            height: 200,
+            className: 'bg-gray-100',
+          }}
+        />
+      </div>
+
+      {/* Buttons */}
+      <div className="flex gap-4 mb-4">
+        <button
+          onClick={clearSignature}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Clear
+        </button>
+        <button
+          onClick={saveSignature}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Save
+        </button>
+      </div>
+
+      {/* Preview */}
+      {signatureURL && (
+        <div>
+          <h3 className="text-md font-medium mb-2">Saved Signature Preview:</h3>
+          <img src={signatureURL} alt="Saved signature" className="border w-[200px]" />
         </div>
       )}
-
-   
+    
     </>
   );
 }
- 
+  
