@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import html2pdf from "html2pdf.js";
 import SignaturePad from 'react-signature-canvas'
+import html2pdf from "html2pdf.js";   
 
 export default function AgreementPage() {
   const [agreementData, setAgreementData] = useState<any>(null);
@@ -13,7 +13,6 @@ export default function AgreementPage() {
   const [submitted, setSubmitted] = useState(false);
   const router = useRouter();
   const pdfRef = useRef(null);
-  const sigCanvasRef = useRef<any>(null);
 
   useEffect(() => {
     const fetchAgreementData = async () => {
@@ -44,27 +43,32 @@ export default function AgreementPage() {
   }, []);
 
   const generatePDFBlob = async () => {
+    if (typeof window === "undefined") return; // Ensure this runs only in the browser
+  
+    const html2pdf = (await import("html2pdf.js")).default; // Dynamically import
     const opt = {
       margin: 0.5,
       filename: "loan-agreement.pdf",
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
     };
     return await html2pdf().set(opt).from(pdfRef.current!).outputPdf("blob");
   };
 
   const handleDownload = async () => {
+    if (typeof window === "undefined") return; // Ensure this runs only in the browser
+  
+    const html2pdf = (await import("html2pdf.js")).default; // Dynamically import
     const opt = {
       margin: 0.5,
       filename: "loan-agreement.pdf",
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
     };
     await html2pdf().set(opt).from(pdfRef.current!).save();
-  };
-
+  }; 
   const handleSubmit = async () => {
     const pdfBlob = await generatePDFBlob();
 
@@ -91,9 +95,8 @@ export default function AgreementPage() {
       alert("Failed to submit agreement: " + (err.response?.data?.message || err.message));
     }
   };
-  // const sigCanvasRef = useRef<any>(null)
-  // const [signatureURL, setSignatureURL] = useState<string | null>(null)
-
+  const sigCanvasRef = useRef<any>(null)
+  const [signatureURL, setSignatureURL] = useState<string | null>(null)
 
 const clearSignature = () => {
   sigCanvasRef.current.clear();
