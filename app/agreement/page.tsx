@@ -13,6 +13,7 @@ export default function AgreementPage() {
   const [submitted, setSubmitted] = useState(false);
   const router = useRouter();
   const pdfRef = useRef(null);
+  const sigCanvasRef = useRef<any>(null);
 
   useEffect(() => {
     const fetchAgreementData = async () => {
@@ -90,22 +91,22 @@ export default function AgreementPage() {
       alert("Failed to submit agreement: " + (err.response?.data?.message || err.message));
     }
   };
-  const sigCanvasRef = useRef<any>(null)
-  const [signatureURL, setSignatureURL] = useState<string | null>(null)
+  // const sigCanvasRef = useRef<any>(null)
+  // const [signatureURL, setSignatureURL] = useState<string | null>(null)
 
-  const clearSignature = () => {
-    sigCanvasRef.current.clear()
-    setSignatureURL(null)
-  }
 
-  const saveSignature = () => {
-    if (!sigCanvasRef.current.isEmpty()) {
-      const dataURL = sigCanvasRef.current.getTrimmedCanvas().toDataURL('image/png')
-      setSignatureURL(dataURL)
-      // You can now use this dataURL to send to your backend or include in PDF
-      console.log('Saved Signature:', dataURL)
-    }
-  }
+const clearSignature = () => {
+  sigCanvasRef.current.clear();
+};
+
+  // const saveSignature = () => {
+  //   if (!sigCanvasRef.current.isEmpty()) {
+  //     const dataURL = sigCanvasRef.current.getTrimmedCanvas().toDataURL('image/png')
+  //     setSignatureURL(dataURL)
+  //     // You can now use this dataURL to send to your backend or include in PDF
+  //     console.log('Saved Signature:', dataURL)
+  //   }
+  // }
 
 
   if (loading) return <div className="text-center mt-10">Loading...</div>;
@@ -169,11 +170,11 @@ export default function AgreementPage() {
             </div>
           </>
         )}
-      </div>
+     
       
-      <div  ref={pdfRef} className="mt-8">
-      <div className="text-black font-sans text-sm">
-    <div className="max-w-full mx-auto p-6 bg-white shadow-md rounded-lg">
+      <div >
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded-xl shadow-md mt-6 text-sm sm:text-base overflow-x-auto">
+      <div className="max-w-full mx-auto p-6 bg-white shadow-md rounded-lg">
       <h1 className="text-2xl font-bold mb-4">Terms & Conditions</h1>
       <p>
         * A period provided to borrowers as an explicit option to exit from loan by paying the
@@ -188,13 +189,13 @@ export default function AgreementPage() {
         <li>BORROWER CAN RAISE THEIR GRIEVANCE BY WRITING TO SUPPORT@XPMKTECH.COM</li>
         <li>BORROWER CAN ALSO REFER TO LINK FOR THE GRIEVANCE REDRESSAL POLICY</li>
         <li>
-        For the purpose of undertaking collection and recovery the Lender either on its own or through 
-the lending service provider (including its agents etc.), undertake collection or recovery from the 
-Borrower. For details of service provider and its agents etc. please refer to “LSPs- DLAs DETAILS” 
-. The Privacy Policy of the Company and LSP/DLA can be viewed at “MFSPLPRIVACY POLICY” and 
-Policy- LSP & DLAs” . 
-All charges will be deducted from the disbursal amount.
-        </li>
+                    For the purpose of undertaking collection and recovery the Lender either on its own or through 
+            the lending service provider (including its agents etc.), undertake collection or recovery from the 
+            Borrower. For details of service provider and its agents etc. please refer to “LSPs- DLAs DETAILS” 
+            . The Privacy Policy of the Company and LSP/DLA can be viewed at “MFSPLPRIVACY POLICY” and 
+            Policy- LSP & DLAs” . 
+            All charges will be deducted from the disbursal amount.
+                    </li>
       </ul>
 
       <h2 className="text-xl font-semibold my-2"> I acknowledge that:</h2>
@@ -408,7 +409,7 @@ as indicated in below table:</p>
       </div>
 
 
-<h2 className="text-lg font-semibold mb-2">Draw Your Signature Below</h2>
+ <h2 className="text-lg font-semibold mb-2">Draw Your Signature Below</h2>
       <div className="border border-gray-300 rounded-md overflow-hidden bg-gray-100 mb-4">
         <SignaturePad
           ref={sigCanvasRef}
@@ -420,7 +421,6 @@ as indicated in below table:</p>
         />
       </div>
 
-      {/* Buttons */}
       <div className="flex gap-4 mb-4">
         <button
           onClick={clearSignature}
@@ -428,22 +428,11 @@ as indicated in below table:</p>
         >
           Clear
         </button>
-        <button
-          onClick={saveSignature}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Save
-        </button>
       </div>
 
       {/* Preview */}
-      {signatureURL && (
-        <div>
-          <h3 className="text-md font-medium mb-2">Saved Signature Preview:</h3>
-          <img src={signatureURL} alt="Saved signature" className="border w-[200px]" />
-        </div>
-      )}
     
+     </div>
     </>
   );
 }

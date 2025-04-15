@@ -52,7 +52,7 @@ export default function ProfilePage() {
         const token = localStorage.getItem("auth_token");
         if (!token) throw new Error("Token not found");
 
-        const response = await fetch("http://147.93.110.43:8000/api/dashboard", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -85,7 +85,7 @@ export default function ProfilePage() {
       const token = localStorage.getItem("auth_token");
       if (!token) throw new Error("Token not found");
 
-      const response = await fetch("http://147.93.110.43:8000/api/delete-account", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/delete-account`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
