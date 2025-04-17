@@ -13,7 +13,7 @@ import confetti from "canvas-confetti"
 export default function TransactionProcessingPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const amount = searchParams.get("amount") || "5000"
+  const amount = searchParams?.get("amount") || "5000"
 
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState<"processing" | "success" | "failed">("processing")
@@ -255,7 +255,7 @@ export default function TransactionProcessingPage() {
                           onClick={handleViewRepaymentSchedule}
                           className="bg-violet-150"
                         >
-                          View Repayment Schedule <ArrowRight className="ml-2 h-4 w-4" />
+                          View Dashboard<ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                       </div>
                     </motion.div>

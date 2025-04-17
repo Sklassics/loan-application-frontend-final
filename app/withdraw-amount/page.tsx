@@ -180,30 +180,103 @@ export default function WithdrawAmountPage() {
     setEmi(Math.round(emiValue));
   }, [amount, tenure, interestRate]);
 
-  const onSubmit: SubmitHandler<{ 
-    amount: number; 
-    tenure: number; 
-    processingFee?: number; 
-    onboardingFee?: number; 
-    documentationFee?: number; 
+  // const onSubmit: SubmitHandler<{ 
+  //   amount: number; 
+  //   tenure: number; 
+  //   processingFee?: number; 
+  //   onboardingFee?: number; 
+  //   documentationFee?: number; 
+  // }> = async (values) => {
+  //   setIsSubmitting(true);
+  //   setWithdrawStatus("idle");
+  //   setErrorMessage("");  // Clear any existing error message
+  
+  //   try {
+  //     // Step 1: Retrieve the authentication token
+  //     const token = localStorage.getItem("auth_token");
+  
+  //     // Step 2: Check if token is available, if not return error
+  //     if (!token || token.trim() === "") {
+  //       setWithdrawStatus("error");
+  //       setErrorMessage("Authentication token is missing. Please log in.");
+  //       setIsSubmitting(false); // Ensure submitting state is cleared
+  //       return;
+  //     }
+  
+  //     // Step 3: Prepare the request body to send to the API
+  //     const requestBody = {
+  //       withdrawAmount: values.amount,
+  //       tenure: `${values.tenure} months`,
+  //       processingFee: values.processingFee ?? 0,
+  //       onboardingFee: values.onboardingFee ?? 0,
+  //       documentationFee: values.documentationFee ?? 0,
+  //     };
+  
+  //     console.log("Request Body:", requestBody); // Debugging the request body
+  //     console.log("Token sent for backend:", token); // Debugging the token
+  
+  //     // Step 4: Make the API request using fetch
+  //     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/withdraw`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Authorization": `Bearer ${token}`,
+  //       },
+  //       body: JSON.stringify(requestBody),
+  //     });
+  
+  //     // Step 5: Parse the response from the backend
+  //     const data = await response.json();
+  //     console.log("Response Data:", data); // Debugging the response
+  
+  //     // Step 6: Handle different response statuses
+  //     if (response.status === 401) {
+  //       // 401: Unauthorized, handle session expiry
+  //       setWithdrawStatus("error");
+  //       setErrorMessage("Session expired. Please log in again.");
+  //       localStorage.removeItem("auth_token"); // Clear invalid token
+  //       router.push("/login"); // Redirect to login page
+  //     } else if (response.ok) {
+  //       // Successful withdrawal
+  //       setWithdrawStatus("success");
+  //       setTimeout(() => {
+  //         router.push(`/agreement?amount=${values.amount}`); // Redirect to processing page
+  //       }, 1500);
+  //     } else {
+  //       // General error response from API
+  //       setWithdrawStatus("error");
+  //       setErrorMessage(data.message || "Withdrawal failed. Please try again.");
+  //     }
+  //   } catch (error) {
+  //     // Handle any errors that occur during the API call
+  //     console.error("Error occurred during withdrawal:", error);
+  //     setWithdrawStatus("error");
+  //     setErrorMessage("An error occurred during withdrawal. Please try again.");
+  //   } finally {
+  //     setIsSubmitting(false); // Ensure the form is not stuck in submitting state
+  //   }
+  // };
+  const onSubmit: SubmitHandler<{
+    amount: number;
+    tenure: number;
+    processingFee?: number;
+    onboardingFee?: number;
+    documentationFee?: number;
   }> = async (values) => {
     setIsSubmitting(true);
     setWithdrawStatus("idle");
-    setErrorMessage("");  // Clear any existing error message
+    setErrorMessage("");
   
     try {
-      // Step 1: Retrieve the authentication token
       const token = localStorage.getItem("auth_token");
   
-      // Step 2: Check if token is available, if not return error
       if (!token || token.trim() === "") {
         setWithdrawStatus("error");
         setErrorMessage("Authentication token is missing. Please log in.");
-        setIsSubmitting(false); // Ensure submitting state is cleared
+        setIsSubmitting(false);
         return;
       }
   
-      // Step 3: Prepare the request body to send to the API
       const requestBody = {
         withdrawAmount: values.amount,
         tenure: `${values.tenure} months`,
@@ -212,50 +285,58 @@ export default function WithdrawAmountPage() {
         documentationFee: values.documentationFee ?? 0,
       };
   
-      console.log("Request Body:", requestBody); // Debugging the request body
-      console.log("Token sent for backend:", token); // Debugging the token
+      console.log("Submitting Withdrawal:", requestBody);
   
-      // Step 4: Make the API request using fetch
+      // ✅ Send the withdrawal request
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/withdraw`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(requestBody),
       });
   
-      // Step 5: Parse the response from the backend
       const data = await response.json();
-      console.log("Response Data:", data); // Debugging the response
+      console.log("Withdraw Response:", data);
   
-      // Step 6: Handle different response statuses
       if (response.status === 401) {
-        // 401: Unauthorized, handle session expiry
         setWithdrawStatus("error");
         setErrorMessage("Session expired. Please log in again.");
-        localStorage.removeItem("auth_token"); // Clear invalid token
-        router.push("/login"); // Redirect to login page
+        localStorage.removeItem("auth_token");
+        router.push("/login");
       } else if (response.ok) {
-        // Successful withdrawal
         setWithdrawStatus("success");
+  
+        // ✅ Call /api/generate for repayment schedule (no response expected)
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/generate`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).catch((err) => {
+          console.error("Error calling /api/generate:", err);
+        });
+  
+        // ✅ Redirect to agreement page after a short delay
         setTimeout(() => {
-          router.push(`/agreement?amount=${values.amount}`); // Redirect to processing page
+          router.push(`/agreement?amount=${values.amount}`);
         }, 1500);
+  
       } else {
-        // General error response from API
         setWithdrawStatus("error");
         setErrorMessage(data.message || "Withdrawal failed. Please try again.");
       }
     } catch (error) {
-      // Handle any errors that occur during the API call
-      console.error("Error occurred during withdrawal:", error);
+      console.error("Error during withdrawal:", error);
       setWithdrawStatus("error");
       setErrorMessage("An error occurred during withdrawal. Please try again.");
     } finally {
-      setIsSubmitting(false); // Ensure the form is not stuck in submitting state
+      setIsSubmitting(false);
     }
   };
+  
+  
   
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -316,17 +397,17 @@ export default function WithdrawAmountPage() {
                             <div className="relative">
                               <IndianRupee className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
                               <Input
-  id="amount-input"
-  type="number"
-  min={loanRange.minAmount}
-  max={loanRange.maxAmount}
-  value={form.watch("amount") ?? loanRange.maxAmount}
-  onChange={(e) => {
-    const val = Number.parseInt(e.target.value);
-    form.setValue("amount", val);
-  }}
-  className="pl-8 w-32 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
-/>
+                                id="amount-input"
+                                type="number"
+                                min={loanRange.minAmount}
+                                max={loanRange.maxAmount}
+                                value={form.watch("amount") ?? loanRange.maxAmount}
+                                onChange={(e) => {
+                                  const val = Number.parseInt(e.target.value);
+                                  form.setValue("amount", val);
+                                }}
+                                className="pl-8 w-32 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
+                              />
                             </div>
                           </div>
                           <FormField
@@ -336,13 +417,13 @@ export default function WithdrawAmountPage() {
                               <FormItem>
                                 <FormControl>
                                 <Slider
-  defaultValue={[field.value]}
-  min={loanRange.minAmount}
-  max={loanRange.maxAmount}
-  step={5000}
-  onValueChange={(value) => field.onChange(value[0])}
-  className="mt-2"
-/>
+                                  defaultValue={[field.value]}
+                                  min={loanRange.minAmount}
+                                  max={loanRange.maxAmount}
+                                  step={5000}
+                                  onValueChange={(value) => field.onChange(value[0])}
+                                  className="mt-2"
+                                />
                                 </FormControl>
                                 <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
                                   {/* <span>₹10,000</span> */}
@@ -361,18 +442,18 @@ export default function WithdrawAmountPage() {
                             </Label>
                             <div className="relative">
                               <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                              <Input
-  id="tenure-input"
-  type="number"
-  min={loanRange.minTenure}
-  max={loanRange.maxTenure}
-  value={form.watch("tenure") ?? loanRange.minTenure}
-  onChange={(e) => {
-    const val = Number.parseInt(e.target.value);
-    form.setValue("tenure", val);
-  }}
-  className="pl-8 w-20 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
-/>
+                               <Input
+                              id="tenure-input"
+                              type="number"
+                              min={loanRange.minTenure}
+                              max={loanRange.maxTenure}
+                              value={form.watch("tenure") ?? loanRange.minTenure}
+                              onChange={(e) => {
+                                const val = Number.parseInt(e.target.value);
+                                form.setValue("tenure", val);
+                              }}
+                              className="pl-8 w-20 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
+                            />
 
                             </div>
                           </div>
