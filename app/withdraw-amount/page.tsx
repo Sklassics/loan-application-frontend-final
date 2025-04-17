@@ -76,6 +76,7 @@ export default function WithdrawAmountPage() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/credit-limit`, {
           headers: {
             Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true",
           },
         });
   
@@ -118,6 +119,7 @@ export default function WithdrawAmountPage() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/bank-details/get`, {
           headers: {
             Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true",
           },
         });
   

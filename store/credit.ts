@@ -5,12 +5,21 @@ import { create } from "zustand";
 
 export const useCreditStore = create<ICreditState>(() => ({
     getCreditLimitAction: async () => {
-        const response: IResponse<any> = await http.get('/api/credit-limit')
-        return response
+      const response: IResponse<any> = await http.get('/api/credit-limit', {
+        headers: {
+          "ngrok-skip-browser-warning": "true"
+        }
+      })
+      return response
     },
-
+  
     withdrawCreditAction: async (payload: IWithdrawReq) => {
-        const response: IResponse<any> = await http.post('/api/credit-limit/withdraw', payload)
-        return response
+      const response: IResponse<any> = await http.post('/api/credit-limit/withdraw', payload, {
+        headers: {
+          "ngrok-skip-browser-warning": "true"
+        }
+      })
+      return response
     }
-}))
+  }))
+

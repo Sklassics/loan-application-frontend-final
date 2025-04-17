@@ -28,6 +28,7 @@ export default function AgreementPage() {
           {
             headers: {
               Authorization: `Bearer ${token}`,
+              "ngrok-skip-browser-warning": "true",
             },
           }
         );
