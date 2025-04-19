@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckCircle, AlertCircle, ArrowRight, Download, Share2 } from "lucide-react"
 import confetti from "canvas-confetti"
+import axios from "axios"
 
 export default function TransactionProcessingPage() {
   const router = useRouter()
@@ -17,9 +18,51 @@ export default function TransactionProcessingPage() {
 
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState<"processing" | "success" | "failed">("processing")
+  const [transactions, setTransactions] = useState<any[]>([]) // Add state for transactions
   const [transactionId, setTransactionId] = useState("")
   const [showConfetti, setShowConfetti] = useState(false)
-
+  useEffect(() => {
+    const createTransaction = async () => {
+      try {
+        const token = localStorage.getItem("auth_token")
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/transactions/create`,
+          { amount: Number(amount) },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
+        )
+        console.log("Transaction created:", response.data)
+      } catch (error) {
+        console.error("Error creating transaction:", error)
+      }
+    }
+  
+    if (status === "success") {
+      createTransaction()
+    }
+  }, [status])
+  const fetchTransactions = async () => {
+    try {
+      const token = localStorage.getItem("auth_token")
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/transactions/all`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "ngrok-skip-browser-warning": "true",
+        },
+      })
+  
+      if (response.data.success) {
+        setTransactions(response.data.transactions)
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error)
+    }
+  }
+  
   useEffect(() => {
     // Generate a random transaction ID
     const randomId = Math.random().toString(36).substring(2, 10).toUpperCase()

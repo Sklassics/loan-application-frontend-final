@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,63 +8,46 @@ import { DashboardHeader } from "@/components/dashboard-header"
 import { DashboardShell } from "@/components/dashboard-shell"
 import { ArrowDownUp, Calendar, Download, Filter, Search } from "lucide-react"
 import { motion } from "framer-motion"
+import axios from "axios"
 
 export default function TransactionsPage() {
+  interface Transaction {
+    id: string
+    date: string
+    description: string
+    amount: number
+    type: string
+    status: string
+  }
+
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [dateRange, setDateRange] = useState({ from: "", to: "" })
-  
-  // Sample transaction data
-  const transactions = [
-    {
-      id: "TXN123456",
-      date: "2023-03-15",
-      description: "Loan Disbursement",
-      amount: 200000,
-      type: "credit",
-      status: "completed"
-    },
-    {
-      id: "TXN123457",
-      date: "2023-04-15",
-      description: "EMI Payment",
-      amount: 18500,
-      type: "debit",
-      status: "completed"
-    },
-    {
-      id: "TXN123458",
-      date: "2023-05-15",
-      description: "EMI Payment",
-      amount: 18500,
-      type: "debit",
-      status: "completed"
-    },
-    {
-      id: "TXN123459",
-      date: "2023-06-15",
-      description: "EMI Payment",
-      amount: 18500,
-      type: "debit",
-      status: "completed"
-    },
-    {
-      id: "TXN123460",
-      date: "2023-07-15",
-      description: "EMI Payment",
-      amount: 18500,
-      type: "debit",
-      status: "completed"
-    },
-    {
-      id: "TXN123461",
-      date: "2023-08-15",
-      description: "EMI Payment",
-      amount: 18500,
-      type: "debit",
-      status: "pending"
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const token = localStorage.getItem("auth_token")
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard`, {
+            headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true",
+
+          }
+        })
+
+        if (response.data && response.data.transactions) {
+          setTransactions(response.data.transactions)
+        } else {
+          console.error("Unexpected API response:", response.data)
+        }
+      } catch (error) {
+        console.error("Failed to fetch transactions", error)
+      }
     }
-  ]
-  
+
+    fetchTransactions()
+  }, [])
   // Filter transactions based on search query and date range
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = searchQuery === "" || 

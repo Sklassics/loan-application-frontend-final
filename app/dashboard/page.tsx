@@ -11,16 +11,53 @@ import { ArrowRight, BadgeCheck, Clock, FileText, IndianRupee, Percent } from "l
 import Link from "next/link"
 import { motion } from "framer-motion"
 import AnimatedCounter from "@/hooks/use-animated-counter"
+import { useToast } from "@/components/ui/use-toast"
+import axios from "axios"
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview")
+  const [dashboardData, setDashboardData] = useState<any>(null)
+  interface ProfileData {
+    firstName: string
+    lastName: string
+    email?: string
+    phoneNumber?: string
+    dateOfBirth?: string
+    address?: string
+  }
+
+  const [profileData, setProfileData] = useState<ProfileData | null>(null)
+
   const [progressValue, setProgressValue] = useState(0)
+  const { toast } = useToast()
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setProgressValue(75)
-    }, 500)
-    return () => clearTimeout(timer)
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("auth_token")
+
+        const headers = {
+          Authorization: `Bearer ${token}`,
+          "ngrok-skip-browser-warning": "true",
+        }
+
+        const [dashboardRes, profileRes] = await Promise.all([
+          axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard`, {
+            headers,
+          }),
+          axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/profile`, {
+            headers,
+          }),
+        ])
+
+        setDashboardData(dashboardRes.data)
+        setProfileData(profileRes.data)
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      }
+    }
+
+    fetchData()
   }, [])
 
   const container = {
@@ -38,7 +75,8 @@ export default function DashboardPage() {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70 } },
   }
-
+  
+  
   return (
     <DashboardShell>
       <DashboardHeader heading="Dashboard" text="Manage your loan applications and account details." />
@@ -85,7 +123,12 @@ export default function DashboardPage() {
                   <BadgeCheck className="h-4 w-4 text-violet-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-slate-800">₹<AnimatedCounter from={0} to={500000} duration={2} /></div>
+                  <div className="text-2xl font-bold text-slate-800"> ₹<AnimatedCounter 
+  from={0} 
+  to={dashboardData?.loans?.[0]?.repaymentSchedules?.[0]?.principalAmount || 0} 
+  duration={2} 
+/>
+                  </div>
                   <p className="text-xs text-slate-500">Maximum eligible amount</p>
                   <Progress
                     value={progressValue}
@@ -120,8 +163,8 @@ export default function DashboardPage() {
                   <p className="text-xs text-slate-500">Current outstanding amount</p>
                   <div className="mt-2 flex items-center gap-2">
                     <Percent className="h-4 w-4 text-indigo-600" />
-                    <span className="text-sm text-slate-700">12% interest rate</span>
-                  </div>
+                    <span className="text-sm text-slate-700">{dashboardData?.interest_rate || 0}% interest rate</span>
+                    </div>
                 </CardContent>
                 <CardFooter>
                   <Link href="/loan-details" className="w-full">
@@ -145,17 +188,24 @@ export default function DashboardPage() {
                   <Clock className="h-4 w-4 text-blue-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-slate-800">Pending</div>
+                  <div className="text-2xl font-bold text-slate-800">
+                  {dashboardData?.verification_status || "Pending"}
+
+                  </div>
                   <p className="text-xs text-slate-500">ID verification required</p>
                   <div className="mt-4 flex flex-col gap-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-slate-600">PAN Card</span>
-                      <span className="text-xs font-medium text-yellow-500">Pending</span>
+                      <span className={`text-xs font-medium ${dashboardData?.pan_status === "Approved" ? "text-green-500" : "text-yellow-500"}`}>
+                         {dashboardData?.pan_status || "Pending"}
+                        </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-slate-600">ID Proof</span>
-                      <span className="text-xs font-medium text-red-500">Not Submitted</span>
-                    </div>
+                      <span className={`text-xs font-medium ${dashboardData?.id_proof_status === "Approved" ? "text-green-500" : "text-red-500"}`}>
+                                 {dashboardData?.id_proof_status || "Not Submitted"}
+                        </span>                   
+                     </div>
                   </div>
                 </CardContent>
                 <CardFooter>
@@ -396,32 +446,32 @@ export default function DashboardPage() {
                     <input
                       type="text"
                       className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition-colors"
-                      defaultValue="John Doe"
-                    />
+                      defaultValue={`${profileData?.firstName || ""} ${profileData?.lastName || ""}`}
+                      />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700">Email</label>
                     <input
                       type="email"
                       className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition-colors"
-                      defaultValue="john.doe@example.com"
-                    />
+                      defaultValue={profileData?.email || ""}
+                      />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700">Phone Number</label>
                     <input
                       type="tel"
                       className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition-colors"
-                      defaultValue="+91 9876543210"
-                    />
+                      defaultValue={profileData?.phoneNumber || ""}
+                      />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700">Date of Birth</label>
                     <input
                       type="date"
                       className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition-colors"
-                      defaultValue="1990-01-01"
-                    />
+                      defaultValue={profileData?.dateOfBirth || ""}
+                      />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -429,8 +479,8 @@ export default function DashboardPage() {
                   <textarea
                     className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition-colors"
                     rows={3}
-                    defaultValue="123 Main Street, Apartment 4B, Mumbai, Maharashtra, 400001"
-                  ></textarea>
+                    defaultValue={profileData?.address || ""}
+                    ></textarea>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">

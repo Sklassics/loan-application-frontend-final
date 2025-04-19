@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardHeader } from "@/components/dashboard-header"
@@ -8,50 +8,72 @@ import { DashboardShell } from "@/components/dashboard-shell"
 import { Calendar, Download, ChevronDown, ChevronUp, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 import { motion, AnimatePresence } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
+import axios from "axios"
+
 
 export default function RepaymentSchedulePage() {
   const [expandedMonth, setExpandedMonth] = useState<number | null>(0)
   const [viewMode, setViewMode] = useState<"calendar" | "list">("list")
+  const [loanDetails, setLoanDetails] = useState<any>(null)
+  const [repaymentSchedule, setRepaymentSchedule] = useState<any[]>([])
 
-  // Sample repayment data
-  const loanDetails = {
-    loanAmount: 500000,
-    interestRate: 12,
-    tenure: 36,
-    emiAmount: 16571,
-    startDate: "2023-03-15",
-    endDate: "2026-03-15",
-    totalInterest: 96556,
-    totalAmount: 596556,
-    paidEMIs: 3,
-    remainingEMIs: 33
-  }
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const token = localStorage.getItem("auth_token") // adjust this if you store it differently
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard`, { 
+           headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true",
 
-  // Generate sample repayment schedule
-  const repaymentSchedule = Array.from({ length: 12 }, (_, monthIndex) => {
-    const month = new Date(loanDetails.startDate)
-    month.setMonth(month.getMonth() + monthIndex)
-    
-    const emiDate = month.getDate()
-    const monthName = month.toLocaleString('default', { month: 'long' })
-    const year = month.getFullYear()
-    
-    const isPaid = monthIndex < 3
-    const isUpcoming = monthIndex === 3
-    
-    return {
-      id: monthIndex,
-      month: monthName,
-      year,
-      emiDate,
-      emiAmount: loanDetails.emiAmount,
-      principal: Math.round(loanDetails.emiAmount * 0.7),
-      interest: Math.round(loanDetails.emiAmount * 0.3),
-      remainingPrincipal: loanDetails.loanAmount - (Math.round(loanDetails.emiAmount * 0.7) * (monthIndex + 1)),
-      status: isPaid ? "paid" : isUpcoming ? "upcoming" : "scheduled",
-      paymentDate: isPaid ? new Date(month.setDate(emiDate - Math.floor(Math.random() * 3))) : null
+          },
+        })
+
+        const data = response.data.dashboardData
+
+        if (data?.loans?.length > 0) {
+          const loan = data.loans[0]
+          setLoanDetails({
+            loanAmount: loan.withdrawAmount,
+            interestRate: loan.repaymentSchedules?.[0]?.interest ?? 0,
+            tenure: loan.tenure,
+            emiAmount: loan.repaymentSchedules?.[0]?.repayableAmount ?? 0,
+            startDate: loan.loanRequestedAt,
+            endDate: loan.repaymentSchedules?.[loan.repaymentSchedules.length - 1]?.dueDate,
+            totalInterest: loan.repaymentSchedules.reduce((acc: number, r: { interest?: number }) => acc + (r.interest || 0), 0),
+            totalAmount: loan.repaymentSchedules.reduce((acc: number, r: { repayableAmount?: number }) => acc + (r.repayableAmount || 0), 0),
+            paidEMIs: loan.repaymentSchedules.filter((r: { paymentStatus: string }) => r.paymentStatus === "Paid").length,
+          })
+
+          const formattedSchedule = loan.repaymentSchedules.map((r: any, index: number) => {
+            const dueDate = new Date(r.dueDate)
+            const isPaid = r.paymentStatus === "Paid"
+            const isUpcoming = r.paymentStatus === "Unpaid" && index === loan.repaymentSchedules.findIndex((s: any) => s.paymentStatus === "Unpaid")
+            return {
+              id: r.id,
+              repaymentDate: r.dueDate,
+              month: dueDate.toLocaleString('default', { month: 'long' }),
+              year: dueDate.getFullYear(),
+              emiDate: dueDate.getDate(),
+              emiAmount: r.repayableAmount,
+              principal: r.principalAmount,
+              interest: r.interest,
+              remainingPrincipal: Math.max(0, loan.withdrawAmount - r.principalAmount * (index + 1)),
+              status: isPaid ? "paid" : isUpcoming ? "upcoming" : "scheduled",
+              paymentDate: isPaid ? dueDate : null
+            }
+          })
+
+          setRepaymentSchedule(formattedSchedule)
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard data", error)
+      }
     }
-  })
+
+    fetchDashboardData()
+  }, [])
+
 
   const toggleMonth = (monthId: number) => {
     setExpandedMonth(expandedMonth === monthId ? null : monthId)
@@ -81,8 +103,16 @@ export default function RepaymentSchedulePage() {
       default:
         return <AlertCircle className="h-4 w-4 text-slate-600" />
     }
+  }  
+      
+  if (!loanDetails) {
+    return (
+      <DashboardShell>
+        <DashboardHeader heading="Repayment Schedule" text="Loading..." />
+        <p className="text-center py-10">Fetching dashboard data...</p>
+      </DashboardShell>
+    )
   }
-
   return (
     <DashboardShell>
       <DashboardHeader
@@ -309,7 +339,7 @@ export default function RepaymentSchedulePage() {
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-sm text-slate-800">
-                          {emi.status === 'paid' ? emi.paymentDate?.toLocaleDateString() : '-'}
+                        {emi.status === 'paid' ? emi.paymentDate?.toLocaleDateString() : '-'}
                         </td>
                       </tr>
                     ))}

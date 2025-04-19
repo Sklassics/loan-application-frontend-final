@@ -43,16 +43,16 @@ export default function WithdrawAmountPage() {
   const [errorMessage, setErrorMessage] = useState("")
   const [processingFee, setProcessingFee] = useState(0)
   const [totalAmount, setTotalAmount] = useState(0)
-  const [interestRate, setInterestRate] = useState(12) 
+  const [interestRate, setInterestRate] = useState(12) // Default interest
   const [emi, setEmi] = useState(0)
   const [activeTab, setActiveTab] = useState("amount")
 
   // For demo purposes, we'll set a random eligible amount
   const eligibleAmount = 500000
   const [loanRange, setLoanRange] = useState({
-    minAmount: 10000,
+    minAmount: 2000,
     maxAmount: 100000,
-    minTenure: 3,
+    minTenure: 1,
     maxTenure: 60
   });
   
@@ -180,82 +180,88 @@ export default function WithdrawAmountPage() {
     setEmi(Math.round(emiValue));
   }, [amount, tenure, interestRate]);
 
-  // const onSubmit: SubmitHandler<{ 
-  //   amount: number; 
-  //   tenure: number; 
-  //   processingFee?: number; 
-  //   onboardingFee?: number; 
-  //   documentationFee?: number; 
+ 
+  // const onSubmit: SubmitHandler<{
+  //   amount: number;
+  //   tenure: number;
+  //   processingFee?: number;
+  //   onboardingFee?: number;
+  //   documentationFee?: number;
   // }> = async (values) => {
   //   setIsSubmitting(true);
   //   setWithdrawStatus("idle");
-  //   setErrorMessage("");  // Clear any existing error message
+  //   setErrorMessage("");
   
   //   try {
-  //     // Step 1: Retrieve the authentication token
   //     const token = localStorage.getItem("auth_token");
   
-  //     // Step 2: Check if token is available, if not return error
   //     if (!token || token.trim() === "") {
   //       setWithdrawStatus("error");
   //       setErrorMessage("Authentication token is missing. Please log in.");
-  //       setIsSubmitting(false); // Ensure submitting state is cleared
+  //       setIsSubmitting(false);
   //       return;
   //     }
   
-  //     // Step 3: Prepare the request body to send to the API
   //     const requestBody = {
   //       withdrawAmount: values.amount,
   //       tenure: `${values.tenure} months`,
   //       processingFee: values.processingFee ?? 0,
   //       onboardingFee: values.onboardingFee ?? 0,
   //       documentationFee: values.documentationFee ?? 0,
+  //       interestRate: interestRate,
   //     };
   
-  //     console.log("Request Body:", requestBody); // Debugging the request body
-  //     console.log("Token sent for backend:", token); // Debugging the token
+  //     console.log("Submitting Withdrawal:", requestBody);
   
-  //     // Step 4: Make the API request using fetch
+  //     // ✅ Send the withdrawal request
   //     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/withdraw`, {
   //       method: "POST",
   //       headers: {
   //         "Content-Type": "application/json",
-  //         "Authorization": `Bearer ${token}`,
+  //         Authorization: `Bearer ${token}`,
   //       },
   //       body: JSON.stringify(requestBody),
   //     });
   
-  //     // Step 5: Parse the response from the backend
   //     const data = await response.json();
-  //     console.log("Response Data:", data); // Debugging the response
+  //     console.log("Withdraw Response:", data);
   
-  //     // Step 6: Handle different response statuses
   //     if (response.status === 401) {
-  //       // 401: Unauthorized, handle session expiry
   //       setWithdrawStatus("error");
   //       setErrorMessage("Session expired. Please log in again.");
-  //       localStorage.removeItem("auth_token"); // Clear invalid token
-  //       router.push("/login"); // Redirect to login page
+  //       localStorage.removeItem("auth_token");
+  //       router.push("/login");
   //     } else if (response.ok) {
-  //       // Successful withdrawal
   //       setWithdrawStatus("success");
+  
+  //       // ✅ Call /api/generate for repayment schedule (no response expected)
+  //       fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/generate`, {
+  //         method: "POST",
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }).catch((err) => {
+  //         console.error("Error calling /api/generate:", err);
+  //       });
+  
+  //       // ✅ Redirect to agreement page after a short delay
   //       setTimeout(() => {
-  //         router.push(`/agreement?amount=${values.amount}`); // Redirect to processing page
+  //         router.push(`/agreement?amount=${values.amount}`);
   //       }, 1500);
+  
   //     } else {
-  //       // General error response from API
   //       setWithdrawStatus("error");
   //       setErrorMessage(data.message || "Withdrawal failed. Please try again.");
   //     }
   //   } catch (error) {
-  //     // Handle any errors that occur during the API call
-  //     console.error("Error occurred during withdrawal:", error);
+  //     console.error("Error during withdrawal:", error);
   //     setWithdrawStatus("error");
   //     setErrorMessage("An error occurred during withdrawal. Please try again.");
   //   } finally {
-  //     setIsSubmitting(false); // Ensure the form is not stuck in submitting state
+  //     setIsSubmitting(false);
   //   }
   // };
+  
   const onSubmit: SubmitHandler<{
     amount: number;
     tenure: number;
@@ -283,11 +289,11 @@ export default function WithdrawAmountPage() {
         processingFee: values.processingFee ?? 0,
         onboardingFee: values.onboardingFee ?? 0,
         documentationFee: values.documentationFee ?? 0,
+        intrest: interestRate / 100, // ✅ Convert 12% to 0.12
       };
   
       console.log("Submitting Withdrawal:", requestBody);
   
-      // ✅ Send the withdrawal request
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/withdraw`, {
         method: "POST",
         headers: {
@@ -308,7 +314,7 @@ export default function WithdrawAmountPage() {
       } else if (response.ok) {
         setWithdrawStatus("success");
   
-        // ✅ Call /api/generate for repayment schedule (no response expected)
+        // Trigger repayment schedule generation
         fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/generate`, {
           method: "POST",
           headers: {
@@ -318,11 +324,10 @@ export default function WithdrawAmountPage() {
           console.error("Error calling /api/generate:", err);
         });
   
-        // ✅ Redirect to agreement page after a short delay
+        // Redirect to agreement
         setTimeout(() => {
           router.push(`/agreement?amount=${values.amount}`);
         }, 1500);
-  
       } else {
         setWithdrawStatus("error");
         setErrorMessage(data.message || "Withdrawal failed. Please try again.");
@@ -335,7 +340,6 @@ export default function WithdrawAmountPage() {
       setIsSubmitting(false);
     }
   };
-  
   
   
   const containerVariants = {
