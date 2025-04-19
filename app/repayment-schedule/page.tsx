@@ -10,7 +10,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 import axios from "axios"
 
-
 export default function RepaymentSchedulePage() {
   const [expandedMonth, setExpandedMonth] = useState<number | null>(0)
   const [viewMode, setViewMode] = useState<"calendar" | "list">("list")
@@ -20,12 +19,16 @@ export default function RepaymentSchedulePage() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const token = localStorage.getItem("auth_token") // adjust this if you store it differently
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard`, { 
-           headers: {
+        const token = localStorage.getItem("auth_token")
+        const apiUrl = "http://192.168.31.179:8088/api/dashboard"
+
+        console.log("API URL:", apiUrl)
+        console.log("Auth Token:", token)
+
+        const response = await axios.get(apiUrl, {
+          headers: {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
-
           },
         })
 
@@ -33,47 +36,51 @@ export default function RepaymentSchedulePage() {
 
         if (data?.loans?.length > 0) {
           const loan = data.loans[0]
+          const schedules = loan.repaymentSchedules || []
+
           setLoanDetails({
             loanAmount: loan.withdrawAmount,
-            interestRate: loan.repaymentSchedules?.[0]?.interest ?? 0,
+            interestRate: schedules?.[0]?.interest ?? 0.12, // default to 0.12
             tenure: loan.tenure,
-            emiAmount: loan.repaymentSchedules?.[0]?.repayableAmount ?? 0,
+            emiAmount: schedules?.[0]?.repayableAmount ?? 0,
             startDate: loan.loanRequestedAt,
-            endDate: loan.repaymentSchedules?.[loan.repaymentSchedules.length - 1]?.dueDate,
-            totalInterest: loan.repaymentSchedules.reduce((acc: number, r: { interest?: number }) => acc + (r.interest || 0), 0),
-            totalAmount: loan.repaymentSchedules.reduce((acc: number, r: { repayableAmount?: number }) => acc + (r.repayableAmount || 0), 0),
-            paidEMIs: loan.repaymentSchedules.filter((r: { paymentStatus: string }) => r.paymentStatus === "Paid").length,
+            endDate: schedules?.[schedules.length - 1]?.dueDate,
+            totalInterest: schedules.reduce((acc: number, r: { interest?: number }) => acc + (r.interest || 0), 0),
+            totalAmount: schedules.reduce((acc: number, r: { repayableAmount?: number }) => acc + (r.repayableAmount || 0), 0),
+            paidEMIs: schedules.filter((r: { paymentStatus: string }) => r.paymentStatus === "Paid").length,
           })
 
-          const formattedSchedule = loan.repaymentSchedules.map((r: any, index: number) => {
+          const formattedSchedule = schedules.map((r: any, index: number) => {
             const dueDate = new Date(r.dueDate)
             const isPaid = r.paymentStatus === "Paid"
-            const isUpcoming = r.paymentStatus === "Unpaid" && index === loan.repaymentSchedules.findIndex((s: any) => s.paymentStatus === "Unpaid")
+            const isUpcoming =
+              r.paymentStatus === "Unpaid" &&
+              index === schedules.findIndex((s: any) => s.paymentStatus === "Unpaid")
+
             return {
               id: r.id,
               repaymentDate: r.dueDate,
-              month: dueDate.toLocaleString('default', { month: 'long' }),
+              month: dueDate.toLocaleString("default", { month: "long" }),
               year: dueDate.getFullYear(),
               emiDate: dueDate.getDate(),
               emiAmount: r.repayableAmount,
               principal: r.principalAmount,
-              interest: r.interest,
+              interest: r.interest ?? 0.12, // fallback to default interest
               remainingPrincipal: Math.max(0, loan.withdrawAmount - r.principalAmount * (index + 1)),
               status: isPaid ? "paid" : isUpcoming ? "upcoming" : "scheduled",
-              paymentDate: isPaid ? dueDate : null
+              paymentDate: isPaid ? dueDate : null,
             }
           })
 
           setRepaymentSchedule(formattedSchedule)
         }
-      } catch (error) {
-        console.error("Error fetching dashboard data", error)
+      } catch (error: any) {
+        console.error("Error fetching dashboard data", error?.response?.data || error.message)
       }
     }
 
     fetchDashboardData()
   }, [])
-
 
   const toggleMonth = (monthId: number) => {
     setExpandedMonth(expandedMonth === monthId ? null : monthId)

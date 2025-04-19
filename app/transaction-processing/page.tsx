@@ -14,7 +14,7 @@ import axios from "axios"
 export default function TransactionProcessingPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const amount = searchParams?.get("amount") || "5000"
+  const amount = searchParams?.get("amount") || "2000"
 
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState<"processing" | "success" | "failed">("processing")
