@@ -19,8 +19,8 @@ export default function RepaymentSchedulePage() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const token = localStorage.getItem("auth_token")
-        const apiUrl = "http://192.168.31.179:8088/api/dashboard"
+        const token = localStorage.getItem("auth_token") || ""
+        const apiUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard`; // Correctly define the API URL
 
         console.log("API URL:", apiUrl)
         console.log("Auth Token:", token)
@@ -40,7 +40,7 @@ export default function RepaymentSchedulePage() {
 
           setLoanDetails({
             loanAmount: loan.withdrawAmount,
-            interestRate: schedules?.[0]?.interest ?? 0.12, // default to 0.12
+            interestRate: schedules?.[0]?.interest ??12, // default to 0.12
             tenure: loan.tenure,
             emiAmount: schedules?.[0]?.repayableAmount ?? 0,
             startDate: loan.loanRequestedAt,
@@ -65,7 +65,7 @@ export default function RepaymentSchedulePage() {
               emiDate: dueDate.getDate(),
               emiAmount: r.repayableAmount,
               principal: r.principalAmount,
-              interest: r.interest ?? 0.12, // fallback to default interest
+              interest: r.interest ?? 12, // fallback to default interest
               remainingPrincipal: Math.max(0, loan.withdrawAmount - r.principalAmount * (index + 1)),
               status: isPaid ? "paid" : isUpcoming ? "upcoming" : "scheduled",
               paymentDate: isPaid ? dueDate : null,
@@ -112,14 +112,7 @@ export default function RepaymentSchedulePage() {
     }
   }  
       
-  if (!loanDetails) {
-    return (
-      <DashboardShell>
-        <DashboardHeader heading="Repayment Schedule" text="Loading..." />
-        <p className="text-center py-10">Fetching dashboard data...</p>
-      </DashboardShell>
-    )
-  }
+ 
   return (
     <DashboardShell>
       <DashboardHeader
@@ -160,67 +153,30 @@ export default function RepaymentSchedulePage() {
               <CardDescription className="text-slate-500">Overview of your loan repayment details</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="space-y-1 p-3 bg-violet-50 rounded-lg">
-                  <p className="text-sm text-slate-600">Loan Amount</p>
-                  <p className="text-2xl font-bold text-slate-800">₹{loanDetails.loanAmount.toLocaleString()}</p>
-                </div>
-                <div className="space-y-1 p-3 bg-indigo-50 rounded-lg">
-                  <p className="text-sm text-slate-600">EMI Amount</p>
-                  <p className="text-2xl font-bold text-slate-800">₹{loanDetails.emiAmount.toLocaleString()}</p>
-                </div>
-                <div className="space-y-1 p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-slate-600">Tenure</p>
-                  <p className="text-2xl font-bold text-slate-800">{loanDetails.tenure} Months</p>
-                </div>
-                <div className="space-y-1 p-3 bg-purple-50 rounded-lg">
-                  <p className="text-sm text-slate-600">Interest Rate</p>
-                  <p className="text-2xl font-bold text-slate-800">{loanDetails.interestRate}%</p>
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <p className="text-sm text-slate-600">Total Interest</p>
-                    <p className="text-sm font-medium text-slate-800">₹{loanDetails.totalInterest.toLocaleString()}</p>
+              {loanDetails ? (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="space-y-1 p-3 bg-violet-50 rounded-lg">
+                    <p className="text-sm text-slate-600">Loan Amount</p>
+                    <p className="text-2xl font-bold text-slate-800">₹{loanDetails.loanAmount.toLocaleString()}</p>
                   </div>
-                  <div className="flex justify-between">
-                    <p className="text-sm text-slate-600">Total Amount</p>
-                    <p className="text-sm font-medium text-slate-800">₹{loanDetails.totalAmount.toLocaleString()}</p>
+                  <div className="space-y-1 p-3 bg-indigo-50 rounded-lg">
+                    <p className="text-sm text-slate-600">EMI Amount</p>
+                    <p className="text-2xl font-bold text-slate-800">₹{loanDetails.emiAmount.toLocaleString()}</p>
                   </div>
-                  <div className="flex justify-between">
-                    <p className="text-sm text-slate-600">Start Date</p>
-                    <p className="text-sm font-medium text-slate-800">{new Date(loanDetails.startDate).toLocaleDateString()}</p>
+                  <div className="space-y-1 p-3 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-slate-600">Tenure</p>
+                    <p className="text-2xl font-bold text-slate-800">{loanDetails.tenure} Months</p>
                   </div>
-                  <div className="flex justify-between">
-                    <p className="text-sm text-slate-600">End Date</p>
-                    <p className="text-sm font-medium text-slate-800">{new Date(loanDetails.endDate).toLocaleDateString()}</p>
+                  <div className="space-y-1 p-3 bg-purple-50 rounded-lg">
+                    <p className="text-sm text-slate-600">Interest Rate</p>
+                    <p className="text-2xl font-bold text-slate-800">{loanDetails.interestRate}%</p>
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-slate-600">EMIs Paid</p>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="success" className="bg-green-100 text-green-800 hover:bg-green-200">
-                        {loanDetails.paidEMIs} / {loanDetails.tenure}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full"
-                      style={{ width: `${(loanDetails.paidEMIs / loanDetails.tenure) * 100}%` }}
-                    ></div>
-                  </div>
-                  <div className="flex justify-between text-xs text-slate-500 mt-1">
-                    <span>0%</span>
-                    <span>Progress: {Math.round((loanDetails.paidEMIs / loanDetails.tenure) * 100)}%</span>
-                    <span>100%</span>
-                  </div>
+              ) : (
+                <div className="flex justify-center items-center h-32">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>

@@ -120,10 +120,15 @@ export default function ProfilePage() {
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70 } },
   };
 
-  if (loadingProfile) {
-    return <div className="p-6 text-center">Loading profile...</div>;
+  const [loadingLoader, setLoadingLoader] = useState(false);
+  
+  if (loadingLoader) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+      </div>
+    );
   }
-
   return (
     <DashboardShell>
       <DashboardHeader heading="Profile" text="Manage your personal information and account settings.">
@@ -141,19 +146,7 @@ export default function ProfilePage() {
             className="bg-violet-150 transition-all duration-300"
           >
             {isSaving ? (
-              <svg
-                className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
             ) : (
               <Save className="mr-2 h-4 w-4" /> 
             )}
@@ -195,10 +188,18 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-4">
                     <div className="relative">
                       <Avatar className="h-20 w-20 border-4 border-white shadow-md">
-                        <AvatarImage src="/placeholder.svg?text=JD" alt="Profile" />
-                        <AvatarFallback className="bg-gradient-to-br from-violet-500 to-indigo-600 text-white">
-                          JD
-                        </AvatarFallback>
+                        {/* Display the selfieImage if available, otherwise fallback to initials */}
+                        {dashboardData?.dashboardData?.profile?.selfieImage ? (
+                          <AvatarImage
+                            src={`data:image/jpeg;base64,${dashboardData.dashboardData.profile.selfieImage}`}
+                            alt="Profile"
+                          />
+                        ) : (
+                          <AvatarFallback className="bg-gradient-to-br from-violet-500 to-indigo-600 text-white">
+                            {dashboardData?.dashboardData?.profile?.firstName?.charAt(0)}
+                            {dashboardData?.dashboardData?.profile?.lastName?.charAt(0)}
+                          </AvatarFallback>
+                        )}
                       </Avatar>
                       {isEditing && (
                         <div className="absolute -right-1 -bottom-1 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 p-1 text-white shadow-sm">
@@ -271,7 +272,11 @@ export default function ProfilePage() {
                       <Input
                         id="dob"
                         type="date"
-                        defaultValue={dashboardData?.dashboardData?.profile?.dateOfBirth}
+                        defaultValue={
+                          dashboardData?.dashboardData?.profile?.dateOfBirth
+                            ? dashboardData.dashboardData.profile.dateOfBirth.split("-").reverse().join("-")
+                            : ""
+                        }
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
@@ -358,7 +363,7 @@ export default function ProfilePage() {
                         <option value="student">Student</option>
                       </select>
                     </div>
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <Label htmlFor="company-name" className="text-slate-700">
                         Company/Organization Name
                       </Label>
@@ -379,23 +384,20 @@ export default function ProfilePage() {
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
-                    </div>
+                    </div> */}
                     <div className="space-y-2">
                       <Label htmlFor="monthly-income" className="text-slate-700">
-                        Monthly Income (₹)
+                        Annual Income (₹)
                       </Label>
                       <Input
-                        id="monthly-income"
+                        id="annual-income"
                         type="number"
-                        defaultValue={
-                          dashboardData?.dashboardData?.profile?.annualIncome
-                            ? Number(dashboardData.dashboardData.profile.annualIncome) / 12
-                            : ""
-                        }                      disabled={!isEditing}
+                        defaultValue={dashboardData?.dashboardData?.profile?.annualIncome || ""}
+                        disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
                     </div>
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <Label htmlFor="work-experience" className="text-slate-700">
                         Work Experience (years)
                       </Label>
@@ -406,7 +408,7 @@ export default function ProfilePage() {
                         disabled={!isEditing}
                         className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                       />
-                    </div>
+                    </div> */}
                   </div>
                 </CardContent>
               </Card>

@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { useState } from "react"
 
 // Custom validator for age (must be 18+)
 const validateAge = (date: Date) => {
@@ -164,39 +165,47 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
           </motion.div>
         </div>
 
+
         <motion.div variants={itemVariants}>
           <FormField
             control={form.control}
             name="dateOfBirth"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Date of Birth</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                   <button
-                        className={cn(
-                          "relative h-14 pl-10 w-full justify-start text-left font-normal border rounded-md border-gray-300",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400" />
-                        {field.value ? format(field.value, "PPP") : <span className="text-sm">Select your date of birth</span>}
-                  </button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage className="animate-slideDown" />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const [isPopoverOpen, setIsPopoverOpen] = useState(false); // State to control Popover
+
+              return (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Date of Birth</FormLabel>
+                  <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <button
+                          className={cn(
+                            "relative h-14 pl-10 w-full justify-start text-left font-normal border rounded-md border-gray-300",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400" />
+                          {field.value ? format(field.value, "PPP") : <span className="text-sm">Select your date of birth</span>}
+                        </button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        selected={field.value}
+                        onSelect={(date) => {
+                          field.onChange(date); // Update the form field
+                          setIsPopoverOpen(false); // Close the Popover
+                        }}
+                        disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage className="animate-slideDown" />
+                </FormItem>
+              );
+            }}
           />
         </motion.div>
 
@@ -244,7 +253,8 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
                 <FormLabel>Marital Status</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="h-14 pl-10 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400">
+                    <SelectTrigger className="h-14 pl-10 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400 relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                       <SelectValue placeholder="Select your marital status" />
                     </SelectTrigger>
                   </FormControl>
@@ -260,7 +270,6 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
             )}
           />
         </motion.div>
-
         <motion.div variants={itemVariants}>
           <FormField
             control={form.control}

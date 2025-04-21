@@ -1,8 +1,7 @@
 "use client";
 
 import type React from "react";
-
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -32,8 +31,20 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { CheckCircle, X, Camera } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { FileUploader } from "../kyc/file-uploader";
+
+// Loader Component
+function Loader() {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-75">
+      <div className="flex flex-col items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-500"></div>
+        <p className="mt-4 text-indigo-500 font-medium">Processing...</p>
+      </div>
+    </div>
+  );
+}
 
 // Dynamic schema based on employment type
 const createFormSchema = (employmentType: string) => {
@@ -154,359 +165,363 @@ export default function EmploymentForm({
   }, [previewUrl]);
 
   const handleSubmit = async (data: any) => {
-    onSubmit(data, idImage);
+    setIsSubmitting(true); // Show loader
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
+      onSubmit(data, idImage);
+      setFormSuccess(true);
+    } catch (error) {
+      console.error("Submission failed:", error);
+    } finally {
+      setIsSubmitting(false); // Hide loader
+    }
   };
 
   return (
-    <Card className="w-full shadow-md border-t-4 border-t-primary">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">
-          {employmentType === "employee"
-            ? "Employment Details"
-            : "Student Details"}
-        </CardTitle>
-        <CardDescription className="text-center">
-          Please provide your{" "}
-          {employmentType === "employee" ? "employment" : "education"}{" "}
-          information
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
-          >
-            <FormField
-              control={form.control}
-              name="employmentType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>I am a</FormLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      setEmploymentType(value);
-                    }}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="h-11 rounded-md">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="employee">Employee</SelectItem>
-                      <SelectItem value="student">Student</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <AnimatePresence mode="wait">
-              {employmentType === "employee" ? (
-                <motion.div
-                  key="employee-form"
-                  variants={formVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="space-y-4"
-                >
-                  <motion.div variants={itemVariants}>
-                    <FormField
-                      control={form.control}
-                      name="companyName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Company Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter your company name"
-                              className="h-11 rounded-md"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-
-                  <motion.div variants={itemVariants}>
-                    <FormField
-                      control={form.control}
-                      name="employeeId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Employee ID</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter your employee ID"
-                              className="h-11 rounded-md"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-
-                  <motion.div variants={itemVariants}>
-                    <FormField
-                      control={form.control}
-                      name="annualIncome"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Annual Income</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter your annual Income"
-                              className="h-11 rounded-md"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-
-                  <motion.div variants={itemVariants}>
-                    <FormField
-                      control={form.control}
-                      name="officeAddress"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Office Address</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter your office address"
-                              className="h-11 rounded-md"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-
-                  <motion.div variants={itemVariants}>
-                    <FormField
-                      control={form.control}
-                      name="idImage"
-                      render={({
-                        field: { onChange, value, ...fieldProps },
-                      }) => (
-                        <FormItem>
-                          <FormLabel>Employee ID Card Image</FormLabel>
-                          <FormControl>
-                            <div className="flex flex-col items-center">
-                              <FileUploader
-                                onFileUpload={handleFileChange}
-                                acceptedFileTypes={["image/jpeg", "image/png"]}
-                                maxSize={5 * 1024 * 1024} // 5MB
-                                label="Upload Profile Image"
-                                description="Upload a clear photo of yourself"
-                                icon="user"
-                              />
-                            </div>
-                          </FormControl>
-                          <FormDescription>
-                            Upload a clear image of your employee ID card
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="student-form"
-                  variants={formVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="space-y-4"
-                >
-                  <motion.div variants={itemVariants}>
-                    <FormField
-                      control={form.control}
-                      name="instituteName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Institute Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter your institute name"
-                              className="h-11 rounded-md"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-
-                  <motion.div variants={itemVariants}>
-                    <FormField
-                      control={form.control}
-                      name="collegeId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Student ID</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter your student ID"
-                              className="h-11 rounded-md"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-
-                  <motion.div variants={itemVariants}>
-                    <FormField
-                      control={form.control}
-                      name="annualIncome"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Annual Income</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter your annual Income"
-                              className="h-11 rounded-md"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-
-                  <motion.div variants={itemVariants}>
-                    <FormField
-                      control={form.control}
-                      name="collegeAddress"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Campus Address</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter your campus address"
-                              className="h-11 rounded-md"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-
-                  <motion.div variants={itemVariants}>
-                    <FormField
-                      control={form.control}
-                      name="idImage"
-                      render={({
-                        field: { onChange, value, ...fieldProps },
-                      }) => (
-                        <FormItem>
-                          <FormLabel>Student ID Card Image</FormLabel>
-                          <FormControl>
-                            <div className="flex flex-col items-center">
-                              <FileUploader
-                                onFileUpload={handleFileChange}
-                                acceptedFileTypes={["image/jpeg", "image/png"]}
-                                maxSize={5 * 1024 * 1024} // 5MB
-                                label="Upload Student ID"
-                                description="Upload a clear photo of your student ID card"
-                                icon="user"
-                              />
-                            </div>
-                          </FormControl>
-                          <FormDescription>
-                            Upload a clear image of your student ID card
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <motion.div
-              className="pt-2"
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
+    <>
+      {isSubmitting && <Loader />} {/* Show loader when submitting */}
+      <Card className="w-full shadow-md border-t-4 border-t-primary">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">
+            {employmentType === "employee"
+              ? "Employment Details"
+              : "Student Details"}
+          </CardTitle>
+          <CardDescription className="text-center">
+            Please provide your{" "}
+            {employmentType === "employee" ? "employment" : "education"}{" "}
+            information
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-4"
             >
-              <Button
-                type="submit"
-                className="w-full h-11 rounded-md relative overflow-hidden"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center justify-center">
-                    <svg
-                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
+              {/* Employment Type */}
+              <FormField
+                control={form.control}
+                name="employmentType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>I am a</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setEmploymentType(value);
+                      }}
+                      defaultValue={field.value}
                     >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Processing...
-                  </span>
-                ) : formSuccess ? (
-                  <span className="flex items-center justify-center">
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Submitted Successfully
-                  </span>
-                ) : (
-                  "Submit"
+                      <FormControl>
+                        <SelectTrigger className="h-11 rounded-md">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="employee">Employee</SelectItem>
+                        <SelectItem value="student">Student</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
                 )}
+              />
 
-                {formSuccess && (
+              <AnimatePresence mode="wait">
+                {employmentType === "employee" ? (
                   <motion.div
-                    className="absolute inset-0 bg-green-500 flex items-center justify-center"
-                    initial={{ width: 0 }}
-                    animate={{ width: "100%" }}
-                    exit={{ width: 0 }}
-                    transition={{ duration: 0.3 }}
+                    key="employee-form"
+                    variants={formVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="space-y-4"
                   >
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Submitted Successfully
+                    {/* Employee Form Fields */}
+                    <motion.div variants={itemVariants}>
+                      <FormField
+                        control={form.control}
+                        name="companyName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Company Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your company name"
+                                className="h-11 rounded-md"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                      <FormField
+                        control={form.control}
+                        name="employeeId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Employee ID</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your employee ID"
+                                className="h-11 rounded-md"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                      <FormField
+                        control={form.control}
+                        name="annualIncome"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Annual Income</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your annual Income"
+                                className="h-11 rounded-md"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                      <FormField
+                        control={form.control}
+                        name="officeAddress"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Office Address</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your office address"
+                                className="h-11 rounded-md"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                      <FormField
+                        control={form.control}
+                        name="idImage"
+                        render={({
+                          field: { onChange, value, ...fieldProps },
+                        }) => (
+                          <FormItem>
+                            <FormLabel>Employee ID Card Image</FormLabel>
+                            <FormControl>
+                              <div className="flex flex-col items-center">
+                                <FileUploader
+                                  onFileUpload={handleFileChange}
+                                  acceptedFileTypes={[
+                                    "image/jpeg",
+                                    "image/png",
+                                  ]}
+                                  maxSize={5 * 1024 * 1024} // 5MB
+                                  label="Upload ID card"
+                                  description="Upload your clear employee ID card"
+                                  icon="user"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormDescription>
+                              Upload a clear image of your employee ID card
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="student-form"
+                    variants={formVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="space-y-4"
+                  >
+                    {/* Student Form Fields */}
+                    <motion.div variants={itemVariants}>
+                      <FormField
+                        control={form.control}
+                        name="instituteName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Institute Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your institute name"
+                                className="h-11 rounded-md"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                      <FormField
+                        control={form.control}
+                        name="collegeId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Student ID</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your student ID"
+                                className="h-11 rounded-md"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                      <FormField
+                        control={form.control}
+                        name="annualIncome"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Annual Income</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your annual Income"
+                                className="h-11 rounded-md"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                      <FormField
+                        control={form.control}
+                        name="collegeAddress"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Campus Address</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter your campus address"
+                                className="h-11 rounded-md"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                      <FormField
+                        control={form.control}
+                        name="idImage"
+                        render={({
+                          field: { onChange, value, ...fieldProps },
+                        }) => (
+                          <FormItem>
+                            <FormLabel>Student ID Card Image</FormLabel>
+                            <FormControl>
+                              <div className="flex flex-col items-center">
+                                <FileUploader
+                                  onFileUpload={handleFileChange}
+                                  acceptedFileTypes={[
+                                    "image/jpeg",
+                                    "image/png",
+                                  ]}
+                                  maxSize={5 * 1024 * 1024} // 5MB
+                                  label="Upload Student ID"
+                                  description="Upload a clear photo of your student ID card"
+                                  icon="user"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormDescription>
+                              Upload a clear image of your student ID card
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
                   </motion.div>
                 )}
-              </Button>
-            </motion.div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+              </AnimatePresence>
+
+              {/* Submit Button */}
+              <motion.div
+                className="pt-2"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <Button
+                  type="submit"
+                  className="w-full h-11 rounded-md relative overflow-hidden"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center justify-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Processing...
+                    </span>
+                  ) : (
+                    "Submit"
+                  )}
+                </Button>
+              </motion.div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </>
   );
 }

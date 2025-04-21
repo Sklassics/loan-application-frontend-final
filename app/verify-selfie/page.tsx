@@ -293,7 +293,23 @@ export default function SelfieVerificationPage() {
       setIsSubmitting(false)
     }
   }
+  const [loadingSelfie, setLoadingSelfie] = useState(false);
 
+  if (loadingSelfie) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+      </div>
+    );
+  }
+  if (isSubmitting) {
+    // Loader displayed during submission
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-500"></div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
       <motion.div

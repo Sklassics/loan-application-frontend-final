@@ -1,132 +1,149 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { CheckCircle, AlertCircle, ArrowRight, Download, Share2 } from "lucide-react"
-import confetti from "canvas-confetti"
-import axios from "axios"
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CheckCircle, AlertCircle, ArrowRight, Download, Share2 } from "lucide-react";
+import confetti from "canvas-confetti";
+import axios from "axios";
 
 export default function TransactionProcessingPage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const amount = searchParams?.get("amount") || "2000"
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const amount = searchParams?.get("amount") || "2000";
 
-  const [progress, setProgress] = useState(0)
-  const [status, setStatus] = useState<"processing" | "success" | "failed">("processing")
-  const [transactions, setTransactions] = useState<any[]>([]) // Add state for transactions
-  const [transactionId, setTransactionId] = useState("")
-  const [showConfetti, setShowConfetti] = useState(false)
-  useEffect(() => {
-    const createTransaction = async () => {
-      try {
-        const token = localStorage.getItem("auth_token")
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/transactions/create`,
-          { amount: Number(amount) },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "ngrok-skip-browser-warning": "true",
-            },
-          }
-        )
-        console.log("Transaction created:", response.data)
-      } catch (error) {
-        console.error("Error creating transaction:", error)
-      }
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState<"processing" | "success" | "failed">("processing");
+  const [transactions, setTransactions] = useState<any[]>([]); // State for transactions
+  const [transactionId, setTransactionId] = useState("");
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  // Function to create a transaction
+  const createTransaction = async () => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/transactions/create`,
+        { amount: Number(amount) },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
+      console.log("Transaction created:", response.data);
+      return response.data; // Return the response to chain the next API call
+    } catch (error) {
+      console.error("Error creating transaction:", error);
+      throw error; // Throw error to handle it in the calling function
     }
-  
-    if (status === "success") {
-      createTransaction()
-    }
-  }, [status])
+  };
+
+  // Function to fetch all transactions
   const fetchTransactions = async () => {
     try {
-      const token = localStorage.getItem("auth_token")
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/transactions/all`, {
+      const token = localStorage.getItem("auth_token");
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/transactions/all`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "ngrok-skip-browser-warning": "true",
         },
-      })
-  
+      });
+
       if (response.data.success) {
-        setTransactions(response.data.transactions)
+        setTransactions(response.data.transactions);
+        console.log("Transactions fetched successfully:", response.data.transactions);
       }
     } catch (error) {
-      console.error("Error fetching transactions:", error)
+      console.error("Error fetching transactions:", error);
     }
-  }
-  
+  };
+
+  // Combined function to handle both APIs
+  const handleTransactionProcess = async () => {
+    try {
+      await createTransaction(); // First, create the transaction
+      await fetchTransactions(); // Then, fetch all transactions
+    } catch (error) {
+      console.error("Error in transaction process:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (status === "success") {
+      handleTransactionProcess(); // Call the combined function when the status is "success"
+    }
+  }, [status]);
+
   useEffect(() => {
     // Generate a random transaction ID
-    const randomId = Math.random().toString(36).substring(2, 10).toUpperCase()
-    setTransactionId(`TXN${randomId}`)
+    const randomId = Math.random().toString(36).substring(2, 10).toUpperCase();
+    setTransactionId(`TXN${randomId}`);
 
     // Simulate transaction processing
     const interval = setInterval(() => {
       setProgress((prevProgress) => {
         if (prevProgress >= 100) {
-          clearInterval(interval)
-          return 100
+          clearInterval(interval);
+          return 100;
         }
-        return prevProgress + 5
-      })
-    }, 300)
+        return prevProgress + 5;
+      });
+    }, 300);
 
     // Simulate transaction completion
     setTimeout(() => {
-      clearInterval(interval)
-      setProgress(100)
-      setStatus("success")
-      setShowConfetti(true)
-    }, 6000)
+      clearInterval(interval);
+      setProgress(100);
+      setStatus("success");
+      setShowConfetti(true);
+    }, 6000);
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
   // Trigger confetti effect when transaction is successful
   useEffect(() => {
     if (showConfetti) {
-      const duration = 3 * 1000
-      const animationEnd = Date.now() + duration
-      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 }
+      const duration = 3 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
       function randomInRange(min: number, max: number) {
-        return Math.random() * (max - min) + min
+        return Math.random() * (max - min) + min;
       }
 
       const interval = setInterval(() => {
-        const timeLeft = animationEnd - Date.now()
+        const timeLeft = animationEnd - Date.now();
 
         if (timeLeft <= 0) {
-          clearInterval(interval)
-          return
+          clearInterval(interval);
+          return;
         }
 
-        const particleCount = 50 * (timeLeft / duration)
+        const particleCount = 50 * (timeLeft / duration);
 
         // Since particles fall down, start a bit higher than random
         confetti({
           ...defaults,
           particleCount,
           origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-        })
+        });
         confetti({
           ...defaults,
           particleCount,
           origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-        })
-      }, 250)
+        });
+      }, 250);
 
-      return () => clearInterval(interval)
+      return () => clearInterval(interval);
     }
-  }, [showConfetti])
+  }, [showConfetti]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -137,7 +154,7 @@ export default function TransactionProcessingPage() {
         staggerChildren: 0.1,
       },
     },
-  }
+  };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -146,30 +163,36 @@ export default function TransactionProcessingPage() {
       opacity: 1,
       transition: { type: "spring", stiffness: 300, damping: 24 },
     },
-  }
+  };
 
   const handleViewRepaymentSchedule = () => {
-    router.push(`/repayment-schedule?amount=${amount}&txn=${transactionId}`)
-  }
+    router.push(`/repayment-schedule?amount=${amount}&txn=${transactionId}`);
+  };
 
   const handleDownloadReceipt = () => {
-    // In a real app, this would generate and download a PDF receipt
-    alert("Receipt download functionality would be implemented here")
-  }
+    alert("Receipt download functionality would be implemented here");
+  };
 
   const handleShareReceipt = () => {
-    // In a real app, this would open a share dialog
     if (navigator.share) {
       navigator.share({
         title: "Loan Disbursement Receipt",
         text: `Loan amount of ₹${Number.parseInt(amount).toLocaleString()} has been disbursed. Transaction ID: ${transactionId}`,
         url: window.location.href,
-      })
+      });
     } else {
-      alert("Share functionality would be implemented here")
+      alert("Share functionality would be implemented here");
     }
+  };
+  const [loadingLoader, setLoadingLoader] = useState(false);
+  
+  if (loadingLoader) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+      </div>
+    );
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-gray-900 dark:to-slate-900 py-12 px-4">
       <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-4xl mx-auto">
@@ -181,37 +204,35 @@ export default function TransactionProcessingPage() {
             {status === "processing"
               ? "Please wait while we process your transaction"
               : status === "success"
-                ? "Your loan has been successfully disbursed"
-                : "There was an issue with your transaction"}
+              ? "Your loan has been successfully disbursed"
+              : "There was an issue with your transaction"}
           </p>
         </motion.div>
 
         <motion.div variants={itemVariants}>
           <Card className="border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden">
             <CardHeader
-              className={`
-              ${
+              className={`${
                 status === "processing"
                   ? "bg-gradient-to-r from-blue-600/10 to-indigo-600/10 dark:from-blue-900/20 dark:to-indigo-900/20"
                   : status === "success"
-                    ? "bg-gradient-to-r from-green-600/10 to-emerald-600/10 dark:from-green-900/20 dark:to-emerald-900/20"
-                    : "bg-gradient-to-r from-red-600/10 to-orange-600/10 dark:from-red-900/20 dark:to-orange-900/20"
-              }
-            `}
+                  ? "bg-gradient-to-r from-green-600/10 to-emerald-600/10 dark:from-green-900/20 dark:to-emerald-900/20"
+                  : "bg-gradient-to-r from-red-600/10 to-orange-600/10 dark:from-red-900/20 dark:to-orange-900/20"
+              }`}
             >
               <CardTitle>
                 {status === "processing"
                   ? "Processing Transaction"
                   : status === "success"
-                    ? "Transaction Successful"
-                    : "Transaction Failed"}
+                  ? "Transaction Successful"
+                  : "Transaction Failed"}
               </CardTitle>
               <CardDescription>
                 {status === "processing"
                   ? "Your loan disbursement is being processed"
                   : status === "success"
-                    ? "Your loan amount has been disbursed to your bank account"
-                    : "There was an issue processing your transaction"}
+                  ? "Your loan amount has been disbursed to your bank account"
+                  : "There was an issue processing your transaction"}
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
@@ -250,29 +271,42 @@ export default function TransactionProcessingPage() {
                         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                           Transaction Details
                         </h3>
-
                         <div className="space-y-3">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600 dark:text-gray-400">Transaction ID:</span>
-                            <span className="font-medium">{transactionId}</span>
-                          </div>
+  {transactions.map((txn) => (
+    <div key={txn.transactionId} className="space-y-3">
+      <div className="flex justify-between text-sm">
+        <span className="text-gray-600 dark:text-gray-400">Transaction ID:</span>
+        <span className="font-medium">{txn.transactionId}</span>
+      </div>
 
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600 dark:text-gray-400">Amount Disbursed:</span>
-                            <span className="font-medium">₹{Number.parseInt(amount).toLocaleString()}</span>
-                          </div>
+      <div className="flex justify-between text-sm">
+        <span className="text-gray-600 dark:text-gray-400">Amount Disbursed:</span>
+        <span className="font-medium">₹{txn.amountDisbursed.toLocaleString()}</span>
+      </div>
 
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600 dark:text-gray-400">Date & Time:</span>
-                            <span className="font-medium">{new Date().toLocaleString()}</span>
-                          </div>
+      <div className="flex justify-between text-sm">
+        <span className="text-gray-600 dark:text-gray-400">Date & Time:</span>
+        <span className="font-medium">{new Date(txn.dateTime).toLocaleString()}</span>
+      </div>
 
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                            <span className="font-medium text-green-600 dark:text-green-400">Successful</span>
-                          </div>
-                        </div>
+      <div className="flex justify-between text-sm">
+        <span className="text-gray-600 dark:text-gray-400">Status:</span>
+        <span
+          className={`font-medium ${
+            txn.status === "Success"
+              ? "text-green-600 dark:text-green-400"
+              : "text-red-600 dark:text-red-400"
+          }`}
+        >
+          {txn.status}
+        </span>
+      </div>
+    </div>
+  ))}
+</div>
                       </div>
+
+                     
 
                       <div className="flex flex-col sm:flex-row gap-3">
                         <Button
@@ -331,6 +365,6 @@ export default function TransactionProcessingPage() {
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }
 

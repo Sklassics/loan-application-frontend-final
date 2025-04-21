@@ -201,7 +201,15 @@ export default function KycVerificationPage() {
     animate: { scale: 1, opacity: 1 },
     exit: { scale: 0.8, opacity: 20 },
   }
-
+  const [loadingLoader, setLoadingLoader] = useState(false);
+  
+  if (loadingLoader) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-gray-900 dark:to-slate-900 py-12 px-4">
       <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-4xl mx-auto">

@@ -1,19 +1,21 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { DashboardShell } from "@/components/dashboard-shell"
 import { ArrowDownUp, Calendar, Download, Filter, Search } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, MotionValue } from "framer-motion"
 import axios from "axios"
 
 export default function TransactionsPage() {
   interface Transaction {
+    transactionId: ReactNode | MotionValue<number> | MotionValue<string>
+    amountDisbursed: any
     id: string
-    date: string
+    dateTime: string
     description: string
     amount: number
     type: string
@@ -28,7 +30,7 @@ export default function TransactionsPage() {
     const fetchTransactions = async () => {
       try {
         const token = localStorage.getItem("auth_token")
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/transactions/all`, {
             headers: {
             Authorization: `Bearer ${token}`,
             "ngrok-skip-browser-warning": "true",
@@ -54,8 +56,8 @@ export default function TransactionsPage() {
       transaction.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       transaction.description.toLowerCase().includes(searchQuery.toLowerCase())
     
-    const matchesDateRange = (dateRange.from === "" || transaction.date >= dateRange.from) &&
-      (dateRange.to === "" || transaction.date <= dateRange.to)
+    const matchesDateRange = (dateRange.from === "" || transaction.dateTime >= dateRange.from) &&
+      (dateRange.to === "" || transaction.dateTime <= dateRange.to)
     
     return matchesSearch && matchesDateRange
   })
@@ -63,7 +65,15 @@ export default function TransactionsPage() {
   const handleDownloadStatement = () => {
     alert("Statement download initiated. Your file will be ready shortly.")
   }
-
+  const [loadingLoader, setLoadingLoader] = useState(false);
+  
+  if (loadingLoader) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+      </div>
+    );
+  }
   return (
     <DashboardShell>
       <motion.div
@@ -198,8 +208,7 @@ export default function TransactionsPage() {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {filteredTransactions.map((transaction, index) => (
-                    <>
+                  {transactions.map((transaction, index) => (
                     <motion.tr
                       key={transaction.id}
                       initial={{ y: 20, opacity: 0 }}
@@ -214,7 +223,7 @@ export default function TransactionsPage() {
                         transition={{ duration: 0.5 }}
                         className="whitespace-nowrap px-4 py-3 text-sm"
                       >
-                        {transaction.id}
+                        {transaction.transactionId}
                       </motion.td>
                       <motion.td
                         initial={{ x: -20, opacity: 0 }}
@@ -222,7 +231,7 @@ export default function TransactionsPage() {
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="whitespace-nowrap px-4 py-3 text-sm"
                       >
-                        {new Date(transaction.date).toLocaleDateString()}
+                        {new Date(transaction.dateTime).toLocaleDateString()}
                       </motion.td>
                       <motion.td
                         initial={{ x: -20, opacity: 0 }}
@@ -230,17 +239,15 @@ export default function TransactionsPage() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className="px-4 py-3 text-sm"
                       >
-                        {transaction.description}
+                        Loan Disbursement
                       </motion.td>
                       <motion.td
                         initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className={`whitespace-nowrap px-4 py-3 text-right text-sm font-medium ${
-                          transaction.type === "credit" ? "text-green-600" : "text-red-600"
-                        }`}
+                        className="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-green-600"
                       >
-                         {transaction.type === "credit" ? "+" : "-"}₹{transaction.amount.toLocaleString()}
+                        ₹{transaction.amountDisbursed.toLocaleString()}
                       </motion.td>
                       <motion.td
                         initial={{ x: -20, opacity: 0 }}
@@ -251,7 +258,6 @@ export default function TransactionsPage() {
                         {transaction.status}
                       </motion.td>
                     </motion.tr>
-                    </>
                   ))}
                 </motion.tbody>
               </motion.table>
@@ -262,5 +268,5 @@ export default function TransactionsPage() {
     </DashboardShell>
   )
 }
-                    
+
 

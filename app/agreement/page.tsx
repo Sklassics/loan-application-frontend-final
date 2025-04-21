@@ -113,7 +113,15 @@ const clearSignature = () => {
   // }
 
 
-  if (loading) return <div className="text-center mt-10">Loading...</div>;
+  const [loadingLoader, setLoadingLoader] = useState(false);
+  
+  if (loadingLoader) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+      </div>
+    );
+  }
   if (error) return <div className="text-red-500 text-center mt-10">{error}</div>;
 
   return (
@@ -397,20 +405,7 @@ as indicated in below table:</p>
   </div>
       </div>
       
-      <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
-        <button
-          onClick={handleDownload}
-          className="px-6 py-2 bg-gray-700 text-white rounded hover:bg-gray-800 transition text-sm"
-        >
-          Download PDF
-        </button>
-        <button
-          onClick={handleSubmit}
-          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm"
-        >
-          Submit Agreement
-        </button>
-      </div>
+      
 
 
  <h2 className="text-lg font-semibold mb-2">Draw Your Signature Below</h2>
@@ -437,6 +432,22 @@ as indicated in below table:</p>
       {/* Preview */}
     
      </div>
+     <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-6">
+        {/* <button
+        disabled
+          onClick={handleDownload}
+          className="px-6 py-2 bg-gray-700 text-white rounded hover:bg-gray-800 transition text-sm"
+        >
+          Download PDF
+          
+        </button> */}
+        <button
+          onClick={handleSubmit}
+          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm"
+        >
+          Submit Agreement
+        </button>
+      </div>
     </>
   );
 }
