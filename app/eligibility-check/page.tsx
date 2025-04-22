@@ -211,13 +211,13 @@
                         <AlertDescription>{errorReason}</AlertDescription>
                       </Alert>
                       <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Button
+                        {/* <Button
                           variant="outline"
                           onClick={() => router.push("/dashboard")}
                           className="border-gray-300 dark:border-gray-600"
                         >
                           Go to Dashboard
-                        </Button>
+                        </Button> */}
                         <Button
                           onClick={() => {
                             setCheckStatus("idle")

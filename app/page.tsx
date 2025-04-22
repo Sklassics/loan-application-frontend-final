@@ -81,7 +81,7 @@ export default function Home() {
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold text-xl">
           <motion.img
-                src="/Sklassics.png" 
+                src="/assets/sklassics.png" 
                 alt="Logo"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
