@@ -10,11 +10,22 @@ import { Card } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import axios from "axios"
 import { useRouter } from "next/navigation"
+function Loader({ message }: { message: string }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-75">
+      <div className="flex flex-col items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-500"></div>
+        <p className="mt-4 text-indigo-500 font-medium">{message}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function SelfieVerificationPage() {
   const [captureMode, setCaptureMode] = useState<"camera" | "upload" | null>(null)
   const [selfieImage, setSelfieImage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(false) // Added isLoading state
   const [isSuccess, setIsSuccess] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -87,112 +98,6 @@ export default function SelfieVerificationPage() {
     }
   }
 
-  // const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0]
-
-  //   if (!file) return
-
-  //   // Check file type
-  //   if (!file.type.match(/^image\/(jpeg|png|jpg)$/)) {
-  //     toast({
-  //       title: "Invalid File Type",
-  //       description: "Please upload a JPG or PNG image.",
-  //       variant: "destructive",
-  //     })
-  //     return
-  //   }
-
-  //   // Check file size (max 5MB)
-  //   if (file.size > 5 * 1024 * 1024) {
-  //     toast({
-  //       title: "File Too Large",
-  //       description: "Please upload an image smaller than 5MB.",
-  //       variant: "destructive",
-  //     })
-  //     return
-  //   }
-
-  //   const reader = new FileReader()
-  //   reader.onload = (e) => {
-  //     setSelfieImage(e.target?.result as string)
-  //   }
-  //   reader.readAsDataURL(file)
-  // }
-
-  // const resetSelfie = () => {
-  //   setSelfieImage(null)
-  //   if (captureMode === "camera") {
-  //     startCamera()
-  //   }
-  // }
-
-  // const handleSubmit = async () => {
-  //   if (!selfieImage) return
-
-  //   setIsSubmitting(true)
-
-  //   try {
-  //     // Convert base64 to blob
-  //     const response = await fetch(selfieImage)
-  //     const blob = await response.blob()
-
-  //     // Create form data
-  //     const formData = new FormData()
-  //     formData.append("selfie_image", blob, "selfie.jpg")
-
-  //     // Get JWT token from localStorage
-  //     const token = localStorage.getItem("auth_token")
-
-  //     if (!token) {
-  //       throw new Error("Authentication token not found")
-  //     }
-
-  //     // Send to API
-  //     const apiResponse : any = await axios.post(
-  //       process.env.NEXT_PUBLIC_BASE_URL + "/selfie/upload", 
-  //       formData,
-  //       {
-  //           headers : {
-  //               Authorization: `Bearer ${token}`,
-  //               "Content-Type": "multipart/form-data",
-  //           }
-  //       }
-  //   )
-
-  //     if (apiResponse.status == 200) {
-  //       // Show success state
-  //       setIsSuccess(true)
-  //       toast({
-  //           title: "Verification Successful",
-  //           description: "Your selfie has been uploaded successfully.",
-  //           variant: "default",
-  //       })
-
-  //       // Reset after 3 seconds
-  //       setTimeout(() => {
-  //           setIsSuccess(false)
-  //           setSelfieImage(null)
-  //           setCaptureMode(null)
-  //           router.push("/kyc-verification")
-  //       }, 3000)
-  //    }else{
-  //       toast({
-  //           title: "Submission Failed",
-  //           description: "Failed to upload selfie. Please try again.",
-  //           variant: "destructive",
-  //         })
-  //    }
-  //   } catch (error) {
-  //     console.error("Error submitting selfie:", error)
-  //     toast({
-  //       title: "Submission Failed",
-  //       description: error instanceof Error ? error.message : "Failed to upload selfie. Please try again.",
-  //       variant: "destructive",
-  //     })
-  //   } finally {
-  //     setIsSubmitting(false)
-  //   }
-  // }
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -293,23 +198,12 @@ export default function SelfieVerificationPage() {
       setIsSubmitting(false)
     }
   }
-  const [loadingSelfie, setLoadingSelfie] = useState(false);
 
-  if (loadingSelfie) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
-      </div>
-    );
+  if (isLoading) {
+    // Show loader while the page is loading
+    return <Loader message="Loading Selfie Verification..." />;
   }
-  if (isSubmitting) {
-    // Loader displayed during submission
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-500"></div>
-      </div>
-    );
-  }
+ 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
       <motion.div
@@ -318,7 +212,11 @@ export default function SelfieVerificationPage() {
         transition={{ duration: 0.5 }}
         className="max-w-md mx-auto"
       >
-        <Card className="overflow-hidden border-t-4 border-t-primary shadow-lg">
+        <Card className="overflow-hidden border-t-4 border-t-primary shadow-lg relative">
+          {isSubmitting && (
+            // Loader overlay while API request is in progress
+            <Loader message="Submitting Selfie..." />
+          )}
           <div className="p-6">
             <motion.h1
               className="text-2xl font-bold text-center mb-2"

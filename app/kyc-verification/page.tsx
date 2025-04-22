@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -41,6 +41,7 @@ export default function KycVerificationPage() {
   const [showOtpScreen, setShowOtpScreen] = useState(false)
   const [otpSent, setOtpSent] = useState(false)
   const [otpResendTimer, setOtpResendTimer] = useState(30)
+  const [loading, setLoading] = useState(true);
   const sendPanOtp = useProfileStore((state) => state.sendPanOtpAction);
   const verifyPanOtp = useProfileStore((state) => state.verifyPanOtpAction);
 
@@ -201,12 +202,21 @@ export default function KycVerificationPage() {
     animate: { scale: 1, opacity: 1 },
     exit: { scale: 0.8, opacity: 20 },
   }
-  const [loadingLoader, setLoadingLoader] = useState(false);
-  
-  if (loadingLoader) {
+ // Set initial state to true
+
+ useEffect(() => {
+  // Simulate a delay or fetch data
+  const timer = setTimeout(() => {
+    setLoading(false); // Set loading to false after delay
+  }, 2000); // Adjust the delay as needed
+
+  return () => clearTimeout(timer); // Cleanup timer on unmount
+}, []);
+  if (loading) {
+    // Loader while data is being fetched
     return (
-      <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-violet-500"></div>
       </div>
     );
   }

@@ -523,7 +523,7 @@ export default function ApplyLoanPage() {
                   />
                   <label htmlFor="final-declaration" className="text-sm text-muted-foreground">
                     I confirm that all the information provided in this application is true, complete, and accurate.
-                    I authorize LoanEase to verify the information provided and obtain additional information as
+                    I authorize Sklassics to verify the information provided and obtain additional information as
                     needed. I agree to the terms and conditions of the loan agreement.
                   </label>
                 </div>

@@ -120,12 +120,11 @@ export default function ProfilePage() {
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70 } },
   };
 
-  const [loadingLoader, setLoadingLoader] = useState(false);
-  
-  if (loadingLoader) {
+  if (loadingProfile) {
+    // Loader while profile data is being fetched
     return (
-      <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-violet-500"></div>
       </div>
     );
   }
@@ -182,137 +181,105 @@ export default function ProfilePage() {
         <TabsContent value="personal" className="space-y-4">
           <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
             <motion.div variants={item}>
-              <Card className="border-slate-200 hover:shadow-md transition-shadow duration-300 overflow-hidden">
+              
+              <Card className="border-slate-200 hover:shadow-md transition-shadow duration-300 overflow-hidden relative">
                 <div className="hidden md:absolute h-1 w-full top-0 bg-gradient-to-r from-violet-500 to-indigo-500"></div>
-                <CardHeader className="relative">
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <Avatar className="h-20 w-20 border-4 border-white shadow-md">
-                        {/* Display the selfieImage if available, otherwise fallback to initials */}
-                        {dashboardData?.dashboardData?.profile?.selfieImage ? (
-                          <AvatarImage
-                            src={`data:image/jpeg;base64,${dashboardData.dashboardData.profile.selfieImage}`}
-                            alt="Profile"
-                          />
-                        ) : (
-                          <AvatarFallback className="bg-gradient-to-br from-violet-500 to-indigo-600 text-white">
-                            {dashboardData?.dashboardData?.profile?.firstName?.charAt(0)}
-                            {dashboardData?.dashboardData?.profile?.lastName?.charAt(0)}
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      {isEditing && (
-                        <div className="absolute -right-1 -bottom-1 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 p-1 text-white shadow-sm">
-                          <label htmlFor="avatar-upload" className="cursor-pointer">
-                            <Camera className="h-4 w-4" />
-                            <span className="sr-only">Upload avatar</span>
-                            <input id="avatar-upload" type="file" className="hidden" accept="image/*" />
-                          </label>
+
+                {loadingProfile ? (
+                  // Loader for the entire card
+                  <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75 z-10">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+                  </div>
+                ) : (
+                  <>
+                    <CardHeader className="relative">
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <Avatar className="h-20 w-20 border-4 border-white shadow-md">
+                            {dashboardData?.dashboardData?.profile?.selfieImage ? (
+                              <AvatarImage
+                                src={`data:image/jpeg;base64,${dashboardData.dashboardData.profile.selfieImage}`}
+                                alt="Profile"
+                              />
+                            ) : (
+                              <AvatarFallback className="bg-gradient-to-br from-violet-500 to-indigo-600 text-white">
+                                {dashboardData?.dashboardData?.profile?.firstName?.charAt(0)}
+                                {dashboardData?.dashboardData?.profile?.lastName?.charAt(0)}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          {isEditing && (
+                            <div className="absolute -right-1 -bottom-1 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 p-1 text-white shadow-sm">
+                              <label htmlFor="avatar-upload" className="cursor-pointer">
+                                <Camera className="h-4 w-4" />
+                                <span className="sr-only">Upload avatar</span>
+                                <input id="avatar-upload" type="file" className="hidden" accept="image/*" />
+                              </label>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <div>
-                <CardTitle className="text-slate-800">{dashboardData?.dashboardData?.profile?.firstName} {dashboardData?.dashboardData?.profile?.lastName}</CardTitle>
-                <CardDescription className="text-slate-500">{dashboardData?.dashboardData?.profile?.email}</CardDescription>
-
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="first-name" className="text-slate-700">
-                        First Name
-                      </Label>
-                      <Input
-                       defaultValue={dashboardData?.dashboardData?.profile?.firstName} 
-                       disabled={!isEditing}
-                        className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="last-name" className="text-slate-700">
-                        Last Name
-                      </Label>
-                      <Input
-                          id="last-name"
-                           defaultValue={dashboardData?.dashboardData?.profile?.lastName} 
-                        disabled={!isEditing}
-                        className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-slate-700">
-                        Email
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        defaultValue={dashboardData?.dashboardData?.profile?.mobile?.email} 
-                        disabled={!isEditing}
-                        className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-slate-700">
-                        Phone Number
-                      </Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        defaultValue={dashboardData?.dashboardData?.profile?.mobile?.mobileNo} 
-                        disabled={!isEditing}
-                        className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="dob" className="text-slate-700">
-                        Date of Birth
-                      </Label>
-                      <Input
-                        id="dob"
-                        type="date"
-                        defaultValue={
-                          dashboardData?.dashboardData?.profile?.dateOfBirth
-                            ? dashboardData.dashboardData.profile.dateOfBirth.split("-").reverse().join("-")
-                            : ""
-                        }
-                        disabled={!isEditing}
-                        className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="gender" className="text-slate-700">
-                        Gender
-                      </Label>
-                      <select
-                        id="gender"
-                        defaultValue={dashboardData?.dashboardData?.profile?.gender}
-                        className="w-full rounded-md border border-slate-300 bg-background px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition-colors"
-                        disabled={!isEditing}
-                      >
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                        <option value="prefer-not-to-say">Prefer not to say</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="address" className="text-slate-700">
-                      Address
-                    </Label>
-                    <textarea
-                      id="address"
-                      className="w-full rounded-md border border-slate-300 bg-background px-3 py-2 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none transition-colors"
-                      rows={3}
-                      defaultValue={dashboardData?.dashboardData?.profile?.address}               
-                             disabled={!isEditing}
-                    ></textarea>
-                  </div>
-                  
-                </CardContent>
+                        <div>
+                          <CardTitle className="text-slate-800">
+                            {dashboardData?.dashboardData?.profile?.firstName}{" "}
+                            {dashboardData?.dashboardData?.profile?.lastName}
+                          </CardTitle>
+                          <CardDescription className="text-slate-500">
+                            {dashboardData?.dashboardData?.profile?.email}
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="first-name" className="text-slate-700">
+                            First Name
+                          </Label>
+                          <Input
+                            defaultValue={dashboardData?.dashboardData?.profile?.firstName}
+                            disabled={!isEditing}
+                            className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="last-name" className="text-slate-700">
+                            Last Name
+                          </Label>
+                          <Input
+                            id="last-name"
+                            defaultValue={dashboardData?.dashboardData?.profile?.lastName}
+                            disabled={!isEditing}
+                            className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="email" className="text-slate-700">
+                            Email
+                          </Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            defaultValue={dashboardData?.dashboardData?.profile?.email}
+                            disabled={!isEditing}
+                            className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="phone" className="text-slate-700">
+                            Phone Number
+                          </Label>
+                          <Input
+                            id="phone"
+                            type="tel"
+                            defaultValue={dashboardData?.dashboardData?.profile?.mobile?.mobileNo}
+                            disabled={!isEditing}
+                            className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </>
+                )}
               </Card>
               
             </motion.div>

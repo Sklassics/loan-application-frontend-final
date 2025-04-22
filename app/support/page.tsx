@@ -44,7 +44,7 @@ export default function SupportPage() {
   const [attachment, setAttachment] = useState<File | null>(null)
   
   const [chatMessages, setChatMessages] = useState([
-    { sender: "system", message: "Welcome to LoanEase support! How can we help you today?", time: "10:30 AM" },
+    { sender: "system", message: "Welcome to Sklassics support! How can we help you today?", time: "10:30 AM" },
   ])
   
   const handleSendMessage = () => {

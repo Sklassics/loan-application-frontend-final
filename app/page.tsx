@@ -350,10 +350,10 @@ export default function Home() {
                     </ul>
                     <Link href="/login">
                     <button className="relative z-10 px-3 py-2 rounded-md text-white font-semibold overflow-hidden border bg-violet-150 bg-opacity-100 transition-all duration-300">
-       Apply Now
-        <span className="absolute bottom-0 left-[-10%] w-0 h-[120%] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
-        <span className="absolute bottom-0 right-[-10%] w-0 h-[120%] border-[#1ea664] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
-      </button>
+                    Apply Now
+                      <span className="absolute bottom-0 left-[-10%] w-0 h-[120%] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+                      <span className="absolute bottom-0 right-[-10%] w-0 h-[120%] border-[#1ea664] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+                    </button>
                     </Link>
                   </motion.div>
                   
@@ -388,10 +388,10 @@ export default function Home() {
                     </ul>
                     <Link href="/login">
                     <button className="relative z-10 px-3 py-2 rounded-md text-white font-semibold overflow-hidden border bg-[#1ea664] bg-opacity-100 transition-all duration-300">
-       Apply Now
-        <span className="absolute bottom-0 left-[-10%] w-0 h-[120%]  bg-violet-150 skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
-        <span className="absolute bottom-0 right-[-10%] w-0 h-[120%] border-violet-150 bg-violet-150 skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
-      </button>
+                      Apply Now
+                        <span className="absolute bottom-0 left-[-10%] w-0 h-[120%]  bg-violet-150 skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+                        <span className="absolute bottom-0 right-[-10%] w-0 h-[120%] border-violet-150 bg-violet-150 skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+                      </button>
                     </Link>
                   </motion.div>
                   
@@ -426,10 +426,10 @@ export default function Home() {
                     </ul>
                     <Link href="/login">
                     <button className="relative z-10 px-3 py-2 rounded-md text-white font-semibold overflow-hidden border bg-violet-150 bg-opacity-100 transition-all duration-300">
-       Apply Now
-        <span className="absolute bottom-0 left-[-10%] w-0 h-[120%] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
-        <span className="absolute bottom-0 right-[-10%] w-0 h-[120%] border-[#1ea664] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
-      </button>
+                      Apply Now
+                        <span className="absolute bottom-0 left-[-10%] w-0 h-[120%] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+                        <span className="absolute bottom-0 right-[-10%] w-0 h-[120%] border-[#1ea664] bg-[#1ea664] skew-x-[0deg] transition-all duration-300 group-hover:w-[62%] z-[-1]"></span>
+                      </button>
                     </Link>
                   </motion.div>
                 </>
@@ -462,7 +462,7 @@ export default function Home() {
                 Why Choose Us
               </div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl bg-clip-text text-gray-800 mb-4">
-                The LoanEase Advantage
+                The Sklassics Advantage
               </h2>
               <p className="max-w-[800px] mx-auto text-slate-700 md:text-xl">
                 We make the loan application process simple, transparent, and hassle-free
@@ -545,7 +545,7 @@ export default function Home() {
                 <div>
                   <h3 className="text-2xl font-bold  mb-4">Our Commitment to You</h3>
                   <p className="text-slate-700 mb-6">
-                    At LoanEase, we're committed to providing a seamless, transparent, and customer-focused lending experience. Our team of financial experts is dedicated to helping you achieve your goals.
+                    At Sklassics, we're committed to providing a seamless, transparent, and customer-focused lending experience. Our team of financial experts is dedicated to helping you achieve your goals.
                   </p>
                   <ul className="space-y-3">
                     <li className="flex items-center gap-3">
@@ -894,7 +894,7 @@ export default function Home() {
               </div>
             </div>
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600">
-              LoanEase
+              Sklassics
             </span>
           </Link>
           <p className="text-sm text-slate-600 md:text-base">Making loans accessible for everyone</p>
@@ -1032,7 +1032,7 @@ export default function Home() {
       </div>
       <div className="border-t ">
         <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-          <p className="text-sm text-slate-600">© {new Date().getFullYear()} LoanEase. All rights reserved.</p>
+          <p className="text-sm text-slate-600">© {new Date().getFullYear()} Sklassics. All rights reserved.</p>
           <div className="flex gap-4">
             <Link href="#" className="text-sm text-slate-600 hover:text-violet-600 transition-colors">
               Privacy Policy

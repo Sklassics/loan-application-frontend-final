@@ -16,21 +16,21 @@ const items = [
     href: "/dashboard",
     icon: Home,
   },
-  {
-    title: "Apply for Loan",
-    href: "/apply-loan",
-    icon: FileText,
-  },
-  {
-    title: "Loan Calculator",
-    href: "/loan-calculator",
-    icon: Calculator,
-  },
-  {
-    title: "Verification",
-    href: "/verification",
-    icon: User,
-  },
+  // {
+  //   title: "Apply for Loan",
+  //   href: "/apply-loan",
+  //   icon: FileText,
+  // },
+  // {
+  //   title: "Loan Calculator",
+  //   href: "/loan-calculator",
+  //   icon: Calculator,
+  // },
+  // {
+  //   title: "Verification",
+  //   href: "/verification",
+  //   icon: User,
+  // },
   {
     title: "Transactions",
     href: "/transactions",
@@ -98,7 +98,7 @@ export function MobileNav() {
         <div className="px-7">
           <Link href="/" className="flex items-center" onClick={() => setOpen(false)}>
             <span className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600">
-              LoanEase
+              Sklassics
             </span>
           </Link>
         </div>

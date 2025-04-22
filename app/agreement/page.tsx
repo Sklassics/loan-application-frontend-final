@@ -8,11 +8,11 @@ import html2pdf from "html2pdf.js";
 
 export default function AgreementPage() {
   const [agreementData, setAgreementData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const router = useRouter();
   const pdfRef = useRef(null);
+  
 
   useEffect(() => {
     const fetchAgreementData = async () => {
@@ -70,13 +70,17 @@ export default function AgreementPage() {
     };
     await html2pdf().set(opt).from(pdfRef.current!).save();
   }; 
-  const handleSubmit = async () => {
-    const pdfBlob = await generatePDFBlob();
+  const [submitting, setSubmitting] = useState(false); // State to track submission status
 
-    const formData = new FormData();
-    formData.append("file", pdfBlob, "loan-agreement.pdf");
+  const handleSubmit = async () => {
+    setSubmitting(true); // Show loader when submission starts
 
     try {
+      const pdfBlob = await generatePDFBlob();
+
+      const formData = new FormData();
+      formData.append("file", pdfBlob, "loan-agreement.pdf");
+
       const token = localStorage.getItem("auth_token");
       if (!token) throw new Error("Token not found");
 
@@ -89,13 +93,15 @@ export default function AgreementPage() {
 
       setSubmitted(true);
 
-      // ✅ Redirect after successful submission
+      // Redirect after successful submission
       router.push("/transaction-processing");
-
     } catch (err: any) {
       alert("Failed to submit agreement: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSubmitting(false); // Hide loader after submission
     }
   };
+
   const sigCanvasRef = useRef<any>(null)
   const [signatureURL, setSignatureURL] = useState<string | null>(null)
 
@@ -113,15 +119,24 @@ const clearSignature = () => {
   // }
 
 
-  const [loadingLoader, setLoadingLoader] = useState(false);
-  
-  if (loadingLoader) {
+  const [loading, setLoading] = useState(true); // Set initial state to true
+  useEffect(() => {
+    // Simulate a delay or fetch data
+    const timer = setTimeout(() => {
+      setLoading(false); // Set loading to false after delay
+    }, 2000); // Adjust the delay as needed
+
+    return () => clearTimeout(timer); // Cleanup timer on unmount
+  }, []);
+ if (loading) {
+    // Loader while data is being fetched
     return (
-      <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-violet-500"></div>
       </div>
     );
   }
+
   if (error) return <div className="text-red-500 text-center mt-10">{error}</div>;
 
   return (
@@ -441,12 +456,43 @@ as indicated in below table:</p>
           Download PDF
           
         </button> */}
-        <button
-          onClick={handleSubmit}
-          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm"
-        >
-          Submit Agreement
-        </button>
+       <button
+        onClick={handleSubmit}
+        disabled={submitting} // Disable button while submitting
+        className={`px-6 py-2 rounded transition text-sm ${
+          submitting
+            ? "bg-blue-400 text-white cursor-not-allowed"
+            : "bg-blue-600 text-white hover:bg-blue-700"
+        }`}
+      >
+        {submitting ? (
+          <span className="flex items-center">
+            <svg
+              className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Submitting...
+          </span>
+        ) : (
+          "Submit Agreement"
+        )}
+      </button>
       </div>
     </>
   );

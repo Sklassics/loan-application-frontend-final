@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -217,15 +217,24 @@ export default function BankVerificationPage() {
       },
     }),
   }
-  const [loadingLoader, setLoadingLoader] = useState(false);
-  
-  if (loadingLoader) {
+  const [loading, setLoading] = useState(true); // Set initial state to true
+  useEffect(() => {
+    // Simulate a delay or fetch data
+    const timer = setTimeout(() => {
+      setLoading(false); // Set loading to false after delay
+    }, 2000); // Adjust the delay as needed
+
+    return () => clearTimeout(timer); // Cleanup timer on unmount
+  }, []);
+ if (loading) {
+    // Loader while data is being fetched
     return (
-      <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-violet-500"></div>
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-gray-900 dark:to-slate-900 py-12 px-4">
       <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-4xl mx-auto">

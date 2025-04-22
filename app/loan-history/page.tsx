@@ -126,15 +126,7 @@ export default function LoanHistoryPage() {
   const viewTransactions = (loanId: string) => {
     router.push(`/transactions?loanId=${loanId}`);
   };
-  const [loadingLoader, setLoadingLoader] = useState(false);
-  
-  if (loadingLoader) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
-      </div>
-    );
-  }
+ 
   return (
     <DashboardShell>
       <DashboardHeader heading="Loan History" text="View and manage your current and past loans.">
@@ -196,7 +188,9 @@ export default function LoanHistoryPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-10">Loading...</div>
+          <div className="flex justify-center items-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+          </div>
         ) : (
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -177,6 +177,13 @@ export default function EmploymentForm({
     }
   };
 
+  const [loading, setLoading] = useState(false);
+
+  if (loading) {
+    // Show loader while the page is loading
+    return <Loader />;
+  }
+
   return (
     <>
       {isSubmitting && <Loader />} {/* Show loader when submitting */}

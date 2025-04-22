@@ -30,14 +30,15 @@ export function DashboardShell({ children, className, ...props }: DashboardShell
         <div className="container flex h-16 items-center justify-between py-4">
           <div className="flex items-center gap-4">
             <MobileNav />
-            <motion.h1
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600"
-            >
-              LoanEase
-            </motion.h1>
+            <motion.img
+                src="/sklassics.png" 
+                alt="Logo"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="w-130 h-10"
+              />
+
           </div>
           <UserNav />
         </div>

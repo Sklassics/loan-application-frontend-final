@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { format, differenceInYears } from "date-fns"
-import { User, Users, CalendarDays } from "lucide-react"
+import { User, Users, CalendarDays, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -309,13 +309,21 @@ export default function PersonalInfoForm({ onSubmit, initialData }: PersonalInfo
         </motion.div>
 
         <motion.div variants={itemVariants} className="flex justify-end">
-          <Button
-            type="submit"
-            className="bg-gradient-to-r from-violet-150 to-violet-150 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-6 rounded-lg text-lg font-medium shadow-md hover:shadow-lg transition-all duration-200"
-          >
-            Continue
-          </Button>
-        </motion.div>
+  <Button
+    type="submit"
+    disabled={form.formState.isSubmitting} // Disable button while submitting
+    className="bg-gradient-to-r from-violet-150 to-violet-150 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-6 rounded-lg text-lg font-medium shadow-md hover:shadow-lg transition-all duration-200"
+  >
+    {form.formState.isSubmitting ? (
+      <>
+        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+        Processing...
+      </>
+    ) : (
+      "Continue"
+    )}
+  </Button>
+</motion.div>
       </form>
     </Form>
   )

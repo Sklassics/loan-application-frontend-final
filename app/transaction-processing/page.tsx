@@ -184,15 +184,24 @@ export default function TransactionProcessingPage() {
       alert("Share functionality would be implemented here");
     }
   };
-  const [loadingLoader, setLoadingLoader] = useState(false);
-  
-  if (loadingLoader) {
+  const [loading, setLoading] = useState(true); // Set initial state to true
+  useEffect(() => {
+    // Simulate a delay or fetch data
+    const timer = setTimeout(() => {
+      setLoading(false); // Set loading to false after delay
+    }, 2000); // Adjust the delay as needed
+
+    return () => clearTimeout(timer); // Cleanup timer on unmount
+  }, []);
+ if (loading) {
+    // Loader while data is being fetched
     return (
-      <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div>
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-20 w-20 border-t-2 border-b-2 border-violet-500"></div>
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-gray-900 dark:to-slate-900 py-12 px-4">
       <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-4xl mx-auto">
@@ -236,6 +245,11 @@ export default function TransactionProcessingPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
+            {loading ? ( // Show loader while fetching transaction details
+    <div className="flex justify-center items-center h-32">
+      <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
+    </div>
+  ) : (
               <div className="space-y-6">
                 {status === "processing" && (
                   <div className="space-y-2">
@@ -271,6 +285,7 @@ export default function TransactionProcessingPage() {
                         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                           Transaction Details
                         </h3>
+                        
                         <div className="space-y-3">
   {transactions.map((txn) => (
     <div key={txn.transactionId} className="space-y-3">
@@ -359,7 +374,7 @@ export default function TransactionProcessingPage() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </div>)}
             </CardContent>
           </Card>
         </motion.div>
