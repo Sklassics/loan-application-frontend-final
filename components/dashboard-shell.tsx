@@ -31,7 +31,7 @@ export function DashboardShell({ children, className, ...props }: DashboardShell
           <div className="flex items-center gap-4">
             <MobileNav />
             <motion.img
-                src="/sklassics.png" 
+                src="https://sklassics.com/wp-content/uploads/2024/06/Sklassics.png" 
                 alt="Logo"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
