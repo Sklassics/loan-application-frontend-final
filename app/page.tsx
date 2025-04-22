@@ -88,7 +88,6 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="w-130 h-10"
               />
-
           </Link>
           <nav className="hidden md:flex gap-6">
             <Link href="#services" className="text-sm font-medium hover:text-violet-600 transition-colors duration-200 relative group">
