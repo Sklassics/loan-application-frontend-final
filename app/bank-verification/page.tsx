@@ -53,9 +53,11 @@ const bankFormSchema = z.object({
     .refine((val) => /^\d+$/.test(val), { message: "Mobile number must contain only digits" }),
   address: z.string().min(5, { message: "Address must be at least 5 characters long" }),
   ifsc: z
-    .string()
-    .length(11, { message: "IFSC code must be exactly 11 characters" })
-    .refine((val) => /^[A-Za-z]{4}\d{7}$/.test(val), { message: "Invalid IFSC code format" }),
+  .string()
+  .length(11, { message: "IFSC code must be exactly 11 characters" }) // Ensure length is 11
+  .refine((val) => /^[A-Za-z]{4}0\d{6}$/.test(val), { // Validate format
+    message: "Invalid IFSC code format. Example: SBIN0001234",
+  }),
 })
 
 // OTP form schema
@@ -331,25 +333,25 @@ export default function BankVerificationPage() {
                           )}
                         />
                           <FormField
-                          control={bankForm.control}
-                          name="ifsc"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>IFSC Code</FormLabel>
-                              <FormControl>
-                                <div className="relative">
-                                  <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                  <Input
-                                    placeholder="Enter IFSC code"
-                                    {...field}
-                                    className="pl-10 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
-                                  />
-                                </div>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+  control={bankForm.control}
+  name="ifsc"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>IFSC Code</FormLabel>
+      <FormControl>
+        <div className="relative">
+          <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Input
+            placeholder="e.g., SBIN0001234" // Example IFSC code as placeholder
+            {...field}
+            className="pl-10 border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
+          />
+        </div>
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
 
                         <FormField
                           control={bankForm.control}

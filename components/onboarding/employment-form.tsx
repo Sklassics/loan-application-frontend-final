@@ -167,8 +167,7 @@ export default function EmploymentForm({
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true); // Show loader
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
-      onSubmit(data, idImage);
+      await onSubmit(data, idImage); // Call the actual onSubmit function
       setFormSuccess(true);
     } catch (error) {
       console.error("Submission failed:", error);

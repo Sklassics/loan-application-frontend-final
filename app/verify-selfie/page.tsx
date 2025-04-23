@@ -53,6 +53,16 @@ export default function SelfieVerificationPage() {
   }, [captureMode])
 
   const startCamera = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast({
+        title: "Unsupported Device",
+        description: "Your device does not support camera access. Please upload an image instead.",
+        variant: "destructive",
+      });
+      setCaptureMode("upload");
+      return;
+    }
+  
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -60,22 +70,42 @@ export default function SelfieVerificationPage() {
           width: { ideal: 1280 },
           height: { ideal: 720 },
         },
-      })
-
+      });
+  
       if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        streamRef.current = stream
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream;
       }
     } catch (err) {
-      console.error("Error accessing camera:", err)
-      toast({
-        title: "Camera Error",
-        description: "Unable to access your camera. Please check permissions or try uploading an image instead.",
-        variant: "destructive",
-      })
-      setCaptureMode("upload")
+      console.error("Error accessing camera:", err);
+      if (err instanceof Error && err.name === "NotAllowedError") {
+        toast({
+          title: "Camera Permission Denied",
+          description: "Please allow camera access in your browser settings.",
+          variant: "destructive",
+        });
+      } else if (err instanceof Error && err.name === "NotFoundError") {
+        toast({
+          title: "Camera Not Found",
+          description: "No camera device was found. Please upload an image instead.",
+          variant: "destructive",
+        });
+      } else if (err instanceof Error && err.name === "NotReadableError") {
+        toast({
+          title: "Camera in Use",
+          description: "Your camera is currently being used by another application. Please close it and try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Camera Error",
+          description: "An unexpected error occurred while accessing the camera.",
+          variant: "destructive",
+        });
+      }
+      setCaptureMode("upload"); // Fallback to upload mode
     }
-  }
+  };
 
   const captureSelfie = () => {
     if (videoRef.current) {
@@ -179,12 +209,10 @@ export default function SelfieVerificationPage() {
           variant: "default",
         })
 
-        setTimeout(() => {
-          setSelfieImage(null)
-          router.push("/kyc-verification")
-        }, 3000)
+        setSelfieImage(null); // Clear the selfie image
+        router.push("/kyc-verification"); // Redirect immediately
       } else {
-        throw new Error("Failed to upload selfie")
+        throw new Error("Failed to upload selfie");
       }
     } catch (error) {
       console.error("Upload Error:", error)

@@ -364,8 +364,7 @@ export default function WithdrawAmountPage() {
                                   min={loanRange.minAmount}
                                   max={loanRange.maxAmount}
                                   step={5000}
-                                  onValueChange={(value) => field.onChange(value[0])}
-                                  className="mt-2"
+                                  onValueChange={() => {}}                                  className="mt-2"
                                 />
                                 </FormControl>
                                 <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -411,9 +410,7 @@ export default function WithdrawAmountPage() {
                                     min={3}
                                     max={60}
                                     step={1}
-                                    onValueChange={(value) => {
-                                      field.onChange(value[0])
-                                    }}
+                                    onValueChange={() => {}}
                                     className="mt-2"
                                   />
                                 </FormControl>
@@ -498,6 +495,7 @@ export default function WithdrawAmountPage() {
                                 <Input
                                   placeholder="Enter account holder name"
                                   {...field}
+                                  readOnly
                                   className="border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
                                 />
                               </FormControl>
@@ -516,6 +514,7 @@ export default function WithdrawAmountPage() {
                                 <Input
                                   placeholder="Enter account number"
                                   {...field}
+                                  readOnly
                                   className="border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
                                 />
                               </FormControl>
@@ -534,6 +533,7 @@ export default function WithdrawAmountPage() {
                                 <Input
                                   placeholder="Enter IFSC code"
                                   {...field}
+                                  readOnly
                                   className="border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-400"
                                 />
                               </FormControl>
