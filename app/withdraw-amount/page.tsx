@@ -46,9 +46,10 @@ export default function WithdrawAmountPage() {
   const [interestRate, setInterestRate] = useState(12) 
   const [emi, setEmi] = useState(0)
   const [activeTab, setActiveTab] = useState("amount")
+  const [creditLimit, setCreditLimit] = useState(2000); // Default to 2000 if not fetched
+
 
   // For demo purposes, we'll set a random eligible amount
-  const eligibleAmount = 500000
   const [loanRange, setLoanRange] = useState({
     minAmount: 2000,
     maxAmount: 100000,
@@ -318,7 +319,7 @@ export default function WithdrawAmountPage() {
             <CardHeader className="bg-gradient-to-r from-purple-600/10 to-indigo-600/10 dark:from-purple-900/20 dark:to-indigo-900/20">
               <CardTitle>Withdraw Funds</CardTitle>
               <CardDescription>
-                You are eligible for a loan of up to ₹{eligibleAmount.toLocaleString("en-IN")}
+                You are eligible for a loan of up to ₹{creditLimit.toLocaleString("en-IN")}
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
@@ -359,13 +360,13 @@ export default function WithdrawAmountPage() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
-                                <Slider
+                                {/* <Slider
                                   defaultValue={[field.value]}
                                   min={loanRange.minAmount}
                                   max={loanRange.maxAmount}
                                   step={5000}
                                   onValueChange={() => {}}                                  className="mt-2"
-                                />
+                                /> */}
                                 </FormControl>
                                 <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
                                   {/* <span>₹10,000</span> */}
@@ -405,14 +406,14 @@ export default function WithdrawAmountPage() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
-                                  <Slider
+                                  {/* <Slider
                                     defaultValue={[field.value]}
                                     min={3}
                                     max={60}
                                     step={1}
                                     onValueChange={() => {}}
                                     className="mt-2"
-                                  />
+                                  /> */}
                                 </FormControl>
                                 <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
                                   {/* <span>3 months</span>

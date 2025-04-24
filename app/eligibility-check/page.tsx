@@ -237,7 +237,7 @@
                   <Clock className="h-4 w-4 mr-1" />
                   Last updated: {new Date().toLocaleDateString()}
                 </div>
-                {checkStatus !== "idle" && checkStatus !== "checking" && (
+                {/* {checkStatus !== "idle" && checkStatus !== "checking" && (
                   <Button
                     variant="ghost"
                     onClick={() => setCheckStatus("idle")}
@@ -245,7 +245,7 @@
                   >
                     Check Again
                   </Button>
-                )}
+                )} */}
               </CardFooter>
             </Card>
           </motion.div>
