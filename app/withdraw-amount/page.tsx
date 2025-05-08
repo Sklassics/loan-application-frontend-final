@@ -345,6 +345,7 @@ export default function WithdrawAmountPage() {
                                 type="number"
                                 min={loanRange.minAmount}
                                 max={loanRange.maxAmount}
+                                readOnly
                                 value={form.watch("amount") ?? loanRange.maxAmount}
                                 onChange={(e) => {
                                   const val = Number.parseInt(e.target.value);
@@ -390,6 +391,7 @@ export default function WithdrawAmountPage() {
                               type="number"
                               min={loanRange.minTenure}
                               max={loanRange.maxTenure}
+                              readOnly
                               value={form.watch("tenure") ?? loanRange.minTenure}
                               onChange={(e) => {
                                 const val = Number.parseInt(e.target.value);

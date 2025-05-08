@@ -259,7 +259,7 @@ export default function ProfilePage() {
                           <Input
                             id="email"
                             type="email"
-                            defaultValue={dashboardData?.dashboardData?.profile?.email}
+                            defaultValue={dashboardData?.dashboardData?.profile?.mobile?.email}
                             disabled={!isEditing}
                             className="border-slate-300 focus:border-violet-500 focus:ring-violet-500/20"
                           />
