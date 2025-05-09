@@ -326,6 +326,7 @@ export default function AddressForm({ onSubmit, onBack, initialData }: AddressFo
               )}
             />
           </motion.div>
+          <p className=" text-red-500 text-sm">*Alternate number and registerd mobile number should not be the same </p>
         </div>
 
         <motion.div variants={itemVariants} className="flex justify-between">

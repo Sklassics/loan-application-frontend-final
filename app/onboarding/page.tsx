@@ -48,32 +48,37 @@ export default function OnboardingPage() {
         formDataObj.append("student_id_card", idImage || "");
         empData = transformStudentData(data);
       }
-
-      const finaldata:any = {...transformedData, ...empData}
-      
+  
+      const finaldata: any = { ...transformedData, ...empData };
       formDataObj.append("data", JSON.stringify(finaldata));  
   
       try {
         const token = localStorage.getItem("auth_token");
-        const response : any = await axios.post(
+        const response: any = await axios.post(
           process.env.NEXT_PUBLIC_BASE_URL + "/api/save-personal-details",
           formDataObj,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        // const response: any = await saveDetails(formDataObj);
+  
         if (response?.status === 200) {
           setIsComplete(true);
         } else {
           toast.error(response?.message);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error submitting form:", error);
-        toast.error("Failed to submit the form.");
+  
+        if (error.response && error.response.data && error.response.data.message) {
+          toast.error(error.response.data.message); // Show the API error message
+        } else {
+          toast.error("Failed to submit the form.");
+        }
       }
     }
   };
+  
 
   function transformFormData(formData : any) {
     const transformedData = {
