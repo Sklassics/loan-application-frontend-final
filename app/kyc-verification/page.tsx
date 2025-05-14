@@ -67,53 +67,59 @@ export default function KycVerificationPage() {
 
   const onPanSubmit = async (values: z.infer<typeof panFormSchema>) => {
     if (!panImage) {
-      setErrorMessage("Please upload your PAN card image")
-      return
+      setErrorMessage("Please upload your PAN card image");
+      return;
     }
-
-    setIsSubmitting(true)
-    setVerificationStatus("idle")
-
+  
+    setIsSubmitting(true);
+    setVerificationStatus("idle");
+  
     try {
       // Create FormData for API call
-      const formData = new FormData()
-      formData.append("pancardNumber", values.panNumber)
-      // const verificationResult = await verifyKyc(formData)
+      const formData = new FormData();
+      formData.append("pancardNumber", values.panNumber);
+  
       const token = getToken();
-      const verificationResult : any = await axios.post(
+      const verificationResult: any = await axios.post(
         process.env.NEXT_PUBLIC_BASE_URL + "/api/pancard/sendOtp",
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      if (verificationResult.status == 200 ) {
-        setIsSubmitting(false)
-        setShowOtpScreen(true)
-        setOtpSent(true)
-
+  
+      if (verificationResult.status === 200) {
+        setIsSubmitting(false);
+        setShowOtpScreen(true);
+        setOtpSent(true);
+  
         // Start OTP timer
-        let timer = 30
+        let timer = 30;
         const interval = setInterval(() => {
-          timer -= 1
-          setOtpResendTimer(timer)
+          timer -= 1;
+          setOtpResendTimer(timer);
           if (timer <= 0) {
-            clearInterval(interval)
+            clearInterval(interval);
           }
-        }, 1000)
+        }, 1000);
       } else {
-        setVerificationStatus("error")
-        setErrorMessage(verificationResult.message || "Verification failed. Please check your details and try again.")
-        setIsSubmitting(false)
+        // Handle error response
+        setVerificationStatus("error");
+        setErrorMessage(
+          verificationResult.data.message || "Verification failed. Please check your details and try again."
+        );
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      setVerificationStatus("error")
-      setErrorMessage("An error occurred during verification. Please try again.")
-      console.error("KYC verification error:", error)
-      setIsSubmitting(false)
+    } catch (error: any) {
+      // Handle error response
+      setVerificationStatus("error");
+      setErrorMessage(
+        error.response?.data?.message || "An error occurred during verification. Please try again."
+      );
+      console.error("KYC verification error:", error);
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const onOtpSubmit = async (values: z.infer<typeof otpFormSchema>) => {
     setIsSubmitting(true)
