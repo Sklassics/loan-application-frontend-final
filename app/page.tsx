@@ -117,12 +117,12 @@ export default function Home() {
       </button>
     </div>
             </Link>
-            <Link href="/login" className="hidden md:block">
+            {/* <Link href="/login" className="hidden md:block">
               <Button className="relative overflow-hidden group bg-violet-150">
                 <span className="relative z-10">Register</span>
                 <span className="absolute inset-0 bg-white/20 transform translate-y-full  group-hover:translate-y-0 transition-transform duration-300"></span>
               </Button>
-            </Link>
+            </Link> */}
           </div>
         </div>
       </header>
